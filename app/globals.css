@@ -2,26 +2,115 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Variables globales — CV Mode (light) par défaut */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-jetbrains: "JetBrains Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  /* Reset propre et base typographique */
+  *, *::before, *::after {
+    box-sizing: border-box;
   }
-}
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+    background-color: #FAFAFA;
+    color: #0F0F0F;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Dark mode (Dev Mode) — activé par classe sur <html> */
+  html.dark body {
+    background-color: #050810;
+    color: #E6EDF3;
+  }
+
+  /* Selection styling */
+  ::selection {
+    background-color: #1E40AF22;
+  }
+
+  html.dark ::selection {
+    background-color: #00FF8833;
+  }
 }
 
 @layer utilities {
+  /* Monospace font pour le Dev Mode */
+  .font-terminal {
+    font-family: var(--font-jetbrains);
+  }
+
+  /* Effet néon subtil */
+  .neon-text {
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  /* Scrollbar personnalisée Dev Mode */
+  html.dark ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  html.dark ::-webkit-scrollbar-track {
+    background: #0D1117;
+  }
+
+  html.dark ::-webkit-scrollbar-thumb {
+    background: #21262D;
+    border-radius: 2px;
+  }
+
+  html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #00FF8840;
+  }
+
+  /* Scrollbar CV Mode */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #E5E7EB;
+    border-radius: 2px;
+  }
+
+  /* Grille de fond Dev Mode */
+  .dev-grid {
+    background-image:
+      linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Masque de fondu pour les sections */
+  .fade-mask-bottom {
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  }
+
+  /* Text balance pour les titres */
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* Animation typewriter cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
 }

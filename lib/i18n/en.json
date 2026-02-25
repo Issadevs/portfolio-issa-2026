@@ -1,0 +1,170 @@
+{
+  "meta": {
+    "title": "Issa KANE — AI & Data Engineer",
+    "description": "Portfolio of Issa KANE, AI & Data engineer, available for apprenticeship from February 2026. EFREI Paris, Machine Learning & Big Data."
+  },
+  "nav": {
+    "parcours": "My journey",
+    "projets": "Projects",
+    "contact": "Contact",
+    "cvMode": "HR Mode",
+    "devMode": "< Dev Mode >",
+    "switchToDev": "Switch to Dev Mode",
+    "switchToCV": "Switch to HR Mode"
+  },
+  "hero": {
+    "greeting": "Hi, I'm",
+    "name": "Issa KANE",
+    "signature": "I turn raw data into intelligent systems.",
+    "subtitle": "AI & Data Engineer — EFREI Paris",
+    "badge": "Apprenticeship from February 2026",
+    "cta_parcours": "My journey",
+    "cta_contact": "Get in touch",
+    "cta_dev": "< Dev Mode >",
+    "scroll": "Scroll"
+  },
+  "story": {
+    "title": "My story",
+    "intro": "Born in Senegal, high school diploma with honors in Dakar, then EFREI Paris in integrated prep class.",
+    "chapter1": {
+      "year": "2022",
+      "title": "First step into the professional world",
+      "text": "In my first year, I did a commercial internship at SFR to understand the business — not just the code. 500 calls a day, collecting client requirements."
+    },
+    "chapter2": {
+      "year": "2023-2025",
+      "title": "From observation to building",
+      "text": "Two years later I came back to SFR as a systems engineer, this time building the systems I had observed. I built a Kafka/Elasticsearch pipeline from scratch, integrated ML for anomaly detection in production."
+    },
+    "chapter3": {
+      "year": "2025-2026",
+      "title": "Master 1 — Towards AI in industry",
+      "text": "Now in my Master 1 at EFREI, I'm looking for an AI/Data apprenticeship to keep building systems that have a real impact."
+    },
+    "chapter4": {
+      "year": "2026",
+      "title": "Available for apprenticeship",
+      "text": "Schedule: 3 days at company / 2 days at school. Île-de-France and partial remote."
+    }
+  },
+  "experience": {
+    "title": "Experience",
+    "sfr_engineer": {
+      "role": "Systems Engineer",
+      "company": "SFR Paris",
+      "period": "August 2023 → August 2025",
+      "duration": "2 years",
+      "type": "Apprenticeship",
+      "bullets": [
+        "Developed a Python/Flask web app for IS performance tracking and management",
+        "Data pipelines with Kafka + Elasticsearch integration",
+        "Supervision and monitoring with Prometheus",
+        "Integrated ML models for anomaly detection and performance optimization",
+        "Strategic project presented to management, led autonomously"
+      ],
+      "impact": "Full pipeline Kafka → Elasticsearch → ML → Prometheus alerting, presented to SFR management"
+    },
+    "sfr_sales": {
+      "role": "Teleprospector",
+      "company": "SFR Paris",
+      "period": "January 2022 → February 2022",
+      "duration": "2 months",
+      "type": "Internship",
+      "bullets": [
+        "Promoted SFR services to SMBs",
+        "500 calls per day",
+        "Collected client requirements for their websites"
+      ],
+      "impact": "Business understanding before engineering"
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "What I've built",
+    "petfinder": {
+      "title": "PetFinder",
+      "category": "Full-stack web application",
+      "description": "Pet adoption platform with authentication, listing management, and real-time multi-criteria search.",
+      "impact": "Robust MVC architecture with Spring Boot, reactive Vue.js SPA",
+      "stack": ["Spring Boot", "MyBatis", "Vue.js", "SQL"]
+    },
+    "bookreco": {
+      "title": "Book Recommendation System",
+      "category": "AI & Data Science",
+      "description": "Personalized recommendation engine combining content analysis and user behavior.",
+      "impact": "Dual content-based + collaborative filtering approach",
+      "stack": ["Python", "NLP", "TF-IDF", "Collaborative Filtering"]
+    },
+    "cproject": {
+      "title": "Recommendations in C",
+      "category": "Self-taught AI project",
+      "description": "User mood analysis to suggest movies and books. Low-level implementation without framework.",
+      "impact": "Manual memory management, custom scoring algorithms",
+      "stack": ["Pure C", "Data Structures", "Algorithms"]
+    },
+    "sfr": {
+      "title": "SFR IS App",
+      "category": "Monitoring & ML — Real Production",
+      "description": "IS performance dashboard with real-time anomaly detection. Presented to SFR management.",
+      "impact": "Full pipeline Kafka → ES → ML → alerting, in production environment",
+      "stack": ["Python/Flask", "Kafka", "Elasticsearch", "Prometheus", "ML"]
+    }
+  },
+  "motivation": {
+    "title": "What drives me",
+    "fitness": {
+      "title": "Discipline — 26 months of fitness",
+      "text": "Over two years of consistent training taught me what data can't yet measure: consistency. I code like I train — with method, patience, and always looking to improve every session."
+    },
+    "football": {
+      "title": "Team spirit — Football since age 7",
+      "text": "In football, victory is collective or it isn't. I bring this team culture to my projects — I listen, communicate, and code for the team as much as for the machine."
+    },
+    "curiosity": {
+      "title": "Curiosity & Autonomy",
+      "text": "I learn fast and independently when I have to — pure C, LangChain, GLSL. But I also love sharing what I discover."
+    }
+  },
+  "contact": {
+    "title": "Get in touch",
+    "subtitle": "Looking for an AI/Data apprenticeship from February 2026",
+    "availability": "Available from February 2026",
+    "rhythm": "3 days company / 2 days school",
+    "location": "Villejuif (94800), Île-de-France",
+    "form": {
+      "name": "Your name",
+      "email": "Your email",
+      "company": "Your company",
+      "message": "Your message",
+      "send": "Send",
+      "sending": "Sending...",
+      "success": "Message sent!",
+      "placeholder_message": "Tell me about the position and the team..."
+    }
+  },
+  "stack": {
+    "title": "Tech stack",
+    "languages": "Languages",
+    "frameworks": "Frameworks",
+    "data_ai": "Data & AI",
+    "bigdata": "Big Data",
+    "databases": "Databases",
+    "systems": "Systems",
+    "devops": "DevOps & Monitoring",
+    "methods": "Methods"
+  },
+  "terminal": {
+    "welcome": "Welcome to Issa's terminal. Type 'help' for a list of commands.",
+    "not_found": "Command not found: '{cmd}'. Type 'help'.",
+    "help_title": "Available commands:",
+    "close": "Close terminal"
+  },
+  "mode": {
+    "switching": "Loading Dev Mode...",
+    "switchingBack": "Switching back to HR Mode..."
+  },
+  "footer": {
+    "built": "Built with Next.js 14, TypeScript, Tailwind, Framer Motion, Three.js",
+    "rights": "Issa KANE — 2026"
+  }
+}

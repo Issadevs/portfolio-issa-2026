@@ -1,0 +1,170 @@
+{
+  "meta": {
+    "title": "Issa KANE — Ingénieur IA & Data",
+    "description": "Portfolio de Issa KANE, ingénieur IA & Data, alternant dès février 2026. EFREI Paris, spécialité Machine Learning & Big Data."
+  },
+  "nav": {
+    "parcours": "Mon parcours",
+    "projets": "Projets",
+    "contact": "Contact",
+    "cvMode": "Mode RH",
+    "devMode": "< Dev Mode >",
+    "switchToDev": "Passer en Dev Mode",
+    "switchToCV": "Passer en Mode RH"
+  },
+  "hero": {
+    "greeting": "Bonjour, je suis",
+    "name": "Issa KANE",
+    "signature": "J'transforme des données brutes en systèmes intelligents.",
+    "subtitle": "Ingénieur IA & Data — EFREI Paris",
+    "badge": "Alternance dès février 2026",
+    "cta_parcours": "Mon parcours",
+    "cta_contact": "Me contacter",
+    "cta_dev": "< Dev Mode >",
+    "scroll": "Défiler"
+  },
+  "story": {
+    "title": "Mon histoire",
+    "intro": "Né au Sénégal, bac scientifique mention AB à Dakar, puis EFREI Paris en classe prépa intégrée.",
+    "chapter1": {
+      "year": "2022",
+      "title": "Premier pas dans le monde pro",
+      "text": "Dès la première année, j'enchaîne un stage commercial chez SFR pour comprendre le business — pas juste le code. 500 appels par jour, collecte des exigences clients."
+    },
+    "chapter2": {
+      "year": "2023-2025",
+      "title": "De l'observation à la construction",
+      "text": "Deux ans plus tard je reviens chez SFR comme ingénieur SI, cette fois je construis les systèmes que j'avais observés. Je monte un pipeline Kafka/Elasticsearch de zéro, j'intègre du ML pour détecter des anomalies en prod."
+    },
+    "chapter3": {
+      "year": "2025-2026",
+      "title": "Master 1 — Vers l'IA en entreprise",
+      "text": "Aujourd'hui en Master 1 à l'EFREI, je cherche une alternance IA/Data pour continuer à construire des systèmes qui ont un impact réel."
+    },
+    "chapter4": {
+      "year": "2026",
+      "title": "Disponible en alternance",
+      "text": "Rythme 3j entreprise / 2j école. Île-de-France et télétravail partiel."
+    }
+  },
+  "experience": {
+    "title": "Expérience",
+    "sfr_engineer": {
+      "role": "Ingénieur SI",
+      "company": "SFR Paris",
+      "period": "Août 2023 → Août 2025",
+      "duration": "2 ans",
+      "type": "Alternance",
+      "bullets": [
+        "Développement d'une app web Python/Flask pour suivi et gestion de la performance SI",
+        "Pipelines de données avec Kafka + intégration Elasticsearch",
+        "Supervision et monitoring avec Prometheus",
+        "Intégration de modèles ML pour détection d'anomalies et optimisation des performances",
+        "Projet stratégique présenté à la direction, mené en autonomie"
+      ],
+      "impact": "Pipeline Kafka → Elasticsearch → ML → alerting Prometheus, présenté à la direction SFR"
+    },
+    "sfr_sales": {
+      "role": "Téléprospecteur",
+      "company": "SFR Paris",
+      "period": "Janvier 2022 → Février 2022",
+      "duration": "2 mois",
+      "type": "Stage",
+      "bullets": [
+        "Promotion des services SFR aux PME",
+        "500 appels par jour",
+        "Collecte des exigences clients pour leurs sites"
+      ],
+      "impact": "Compréhension business avant l'ingénierie"
+    }
+  },
+  "projects": {
+    "title": "Projets",
+    "subtitle": "Ce que j'ai construit",
+    "petfinder": {
+      "title": "PetFinder",
+      "category": "Application web full-stack",
+      "description": "Plateforme d'adoption d'animaux avec authentification, gestion d'annonces, et recherche multicritères en temps réel.",
+      "impact": "Architecture MVC robuste avec Spring Boot, SPA Vue.js réactive",
+      "stack": ["Spring Boot", "MyBatis", "Vue.js", "SQL"]
+    },
+    "bookreco": {
+      "title": "Système de recommandation de livres",
+      "category": "IA & Data Science",
+      "description": "Moteur de recommandation personnalisé combinant analyse de contenu et comportement utilisateur.",
+      "impact": "Double approche content-based + collaborative filtering",
+      "stack": ["Python", "NLP", "TF-IDF", "Filtrage collaboratif"]
+    },
+    "cproject": {
+      "title": "Recommandations en C",
+      "category": "Projet IA autodidacte",
+      "description": "Analyse de l'humeur utilisateur pour suggérer films et livres. Implémentation bas-niveau sans framework.",
+      "impact": "Gestion mémoire manuelle, algos de scoring custom",
+      "stack": ["C pur", "Structures de données", "Algorithmes"]
+    },
+    "sfr": {
+      "title": "App SI SFR",
+      "category": "Monitoring & ML — Production réelle",
+      "description": "Tableau de bord de performance SI avec détection d'anomalies en temps réel. Présenté à la direction SFR.",
+      "impact": "Pipeline complet Kafka → ES → ML → alerting, en environnement production",
+      "stack": ["Python/Flask", "Kafka", "Elasticsearch", "Prometheus", "ML"]
+    }
+  },
+  "motivation": {
+    "title": "Ce qui me motive",
+    "fitness": {
+      "title": "Discipline — 26 mois de fitness",
+      "text": "La régularité au gym depuis plus de deux ans m'a appris ce que la data ne peut pas encore mesurer : la constance. Je code comme je m'entraîne — avec méthode, avec patience, et en cherchant à progresser à chaque session."
+    },
+    "football": {
+      "title": "Esprit d'équipe — Football depuis 7 ans",
+      "text": "Au foot, la victoire est collective ou elle n'est pas. Cette culture du collectif, je l'apporte dans mes projets — j'écoute, je communique, je code pour l'équipe autant que pour la machine."
+    },
+    "curiosity": {
+      "title": "Curiosité & Autonomie",
+      "text": "J'apprends vite et seul quand je dois — C pur, LangChain, GLSL. Mais j'aime aussi partager ce que j'apprends."
+    }
+  },
+  "contact": {
+    "title": "Me contacter",
+    "subtitle": "Je cherche une alternance IA/Data dès février 2026",
+    "availability": "Disponible dès février 2026",
+    "rhythm": "3j entreprise / 2j école",
+    "location": "Villejuif (94800), Île-de-France",
+    "form": {
+      "name": "Votre nom",
+      "email": "Votre email",
+      "company": "Votre entreprise",
+      "message": "Votre message",
+      "send": "Envoyer",
+      "sending": "Envoi...",
+      "success": "Message envoyé !",
+      "placeholder_message": "Dites-moi tout sur le poste et l'équipe..."
+    }
+  },
+  "stack": {
+    "title": "Stack technique",
+    "languages": "Langages",
+    "frameworks": "Frameworks",
+    "data_ai": "Data & IA",
+    "bigdata": "Big Data",
+    "databases": "Bases de données",
+    "systems": "Systèmes",
+    "devops": "DevOps & Monitoring",
+    "methods": "Méthodes"
+  },
+  "terminal": {
+    "welcome": "Bienvenue dans le terminal d'Issa. Tapez 'help' pour la liste des commandes.",
+    "not_found": "Commande non reconnue : '{cmd}'. Tapez 'help'.",
+    "help_title": "Commandes disponibles :",
+    "close": "Fermer le terminal"
+  },
+  "mode": {
+    "switching": "Chargement du Dev Mode...",
+    "switchingBack": "Retour au Mode RH..."
+  },
+  "footer": {
+    "built": "Construit avec Next.js 14, TypeScript, Tailwind, Framer Motion, Three.js",
+    "rights": "Issa KANE — 2026"
+  }
+}

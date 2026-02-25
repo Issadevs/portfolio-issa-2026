@@ -1,101 +1,141 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+// Page principale — orchestration des deux modes CV et Dev
+// Choix : tout dans un seul composant client pour partager l'état mode/langue
+// Le WebGL background est importé dynamiquement (ssr: false) car Three.js est client-only
+
+import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMode } from "@/hooks/useMode";
+import { useLang } from "@/hooks/useLang";
+import { useTerminal } from "@/hooks/useTerminal";
+
+// Composants partagés
+import Header from "@/components/shared/Header";
+import GlitchTransition from "@/components/shared/GlitchTransition";
+
+// Composants CV Mode
+import HeroCV from "@/components/cv/HeroCV";
+import StoryCV from "@/components/cv/StoryCV";
+import ExperienceCV from "@/components/cv/ExperienceCV";
+import ProjectsCV from "@/components/cv/ProjectsCV";
+import MotivationCV from "@/components/cv/MotivationCV";
+import ContactCV from "@/components/cv/ContactCV";
+
+// Composants Dev Mode
+import HeroDev from "@/components/dev/HeroDev";
+import ProjectsDev from "@/components/dev/ProjectsDev";
+import StackDev from "@/components/dev/StackDev";
+import GitHubFeed from "@/components/dev/GitHubFeed";
+import Terminal from "@/components/dev/Terminal";
+import PerfBadge from "@/components/dev/PerfBadge";
+
+// Dynamic import obligatoire pour Three.js (client-only, pas de SSR)
+const WebGLBackground = dynamic(
+  () => import("@/components/dev/WebGLBackground"),
+  { ssr: false, loading: () => null }
+);
+
+export default function Portfolio() {
+  const { mode, toggleMode, isGlitching } = useMode();
+  const { lang, toggleLang, t, isTransitioning } = useLang();
+  const terminal = useTerminal(lang);
+
+  const isDev = mode === "dev";
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <>
+      {/* Transition glitch entre modes */}
+      <GlitchTransition isActive={isGlitching} targetMode={isDev ? "dev" : "cv"} />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      {/* Background WebGL (Dev Mode uniquement) */}
+      {isDev && <WebGLBackground />}
+
+      {/* Grille CSS de fond (Dev Mode) */}
+      {isDev && <div className="fixed inset-0 z-[1] dev-grid pointer-events-none" />}
+
+      {/* Header partagé */}
+      <Header
+        mode={mode}
+        lang={lang}
+        t={t}
+        onToggleMode={toggleMode}
+        onToggleLang={toggleLang}
+        isGlitching={isGlitching}
+      />
+
+      {/* Contenu principal avec fade sur changement de langue */}
+      <motion.main
+        animate={{ opacity: isTransitioning ? 0 : 1 }}
+        transition={{ duration: 0.15 }}
+        className={`relative ${isDev ? "z-10" : "z-0"}`}
+      >
+        <AnimatePresence mode="wait">
+          {!isDev ? (
+            // ═══════════════════════════════════
+            //  CV MODE — Pour les RH
+            // ═══════════════════════════════════
+            <motion.div
+              key="cv"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-cv-bg min-h-screen"
+            >
+              <HeroCV t={t} lang={lang} onSwitchToDev={toggleMode} />
+              <StoryCV t={t} />
+              <ExperienceCV t={t} />
+              <ProjectsCV t={t} />
+              <MotivationCV t={t} />
+              <ContactCV t={t} />
+
+              {/* Footer CV */}
+              <footer className="py-8 px-4 border-t border-cv-border">
+                <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-cv-muted text-xs">
+                  <p>{t("footer.rights")}</p>
+                  <p className="text-center">{t("footer.built")}</p>
+                </div>
+              </footer>
+            </motion.div>
+          ) : (
+            // ═══════════════════════════════════
+            //  DEV MODE — Pour les lead devs
+            // ═══════════════════════════════════
+            <motion.div
+              key="dev"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="min-h-screen"
+            >
+              <HeroDev
+                t={t}
+                lang={lang}
+                onOpenTerminal={terminal.openTerminal}
+              />
+              <ProjectsDev t={t} lang={lang} />
+              <StackDev t={t} lang={lang} />
+              <GitHubFeed lang={lang} />
+
+              {/* Footer Dev */}
+              <footer className="py-8 px-4 border-t border-dev-border relative z-10">
+                <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-dev-muted text-xs font-mono">
+                  <p><span className="opacity-60">{"//"}</span>{" "}{t("footer.rights")}</p>
+                  <p className="text-center opacity-50">{t("footer.built")}</p>
+                </div>
+              </footer>
+
+              {/* Terminal (Ctrl+K) */}
+              <Terminal {...terminal} t={t} />
+
+              {/* Badge performance */}
+              <PerfBadge />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.main>
+    </>
   );
 }
