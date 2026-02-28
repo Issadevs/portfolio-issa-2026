@@ -108,7 +108,10 @@
       "description": "Tableau de bord de performance SI avec détection d'anomalies en temps réel. Présenté à la direction SFR.",
       "impact": "Pipeline complet Kafka → ES → ML → alerting, en environnement production",
       "stack": ["Python/Flask", "Kafka", "Elasticsearch", "Prometheus", "ML"]
-    }
+    },
+    "evaluation_section": "Jeu de données & protocole",
+    "evaluation_dataset_label": "Dataset",
+    "evaluation_protocol_label": "Protocole"
   },
   "motivation": {
     "title": "Ce qui me motive",

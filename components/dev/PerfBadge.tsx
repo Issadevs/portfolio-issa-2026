@@ -1,41 +1,47 @@
 "use client";
 
 // Badge de performance live — Dev Mode uniquement
-// Affiche FPS, mémoire JS estimée, score Lighthouse approché
-// Choix : requestAnimationFrame pour le FPS, performance.memory pour la mémoire
+// Métriques réelles — PerformanceObserver + Navigation Timing
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 interface PerfData {
   fps: number;
-  memory: number | null;
-  lighthouseScore: number;
+  memory: number | null;    // Chrome only
+  ttfb: number | null;      // ms, Navigation Timing
+  fcp: number | null;       // ms, PerformanceObserver paint
+  lcp: number | null;       // ms, PerformanceObserver largest-contentful-paint
 }
 
-// Estimation du score Lighthouse basée sur FPS et mémoire
-function estimateLighthouse(fps: number, mem: number | null): number {
-  let score = 100;
-  if (fps < 55) score -= 15;
-  if (fps < 30) score -= 25;
-  if (mem && mem > 50) score -= 10;
-  if (mem && mem > 100) score -= 20;
-  return Math.max(0, score);
+// Couleur pour métriques "plus bas = mieux" (TTFB, FCP, LCP)
+function colorLow(value: number, good: number, needs: number): string {
+  if (value < good) return "text-[#00FF88]";
+  if (value < needs) return "text-yellow-400";
+  return "text-red-400";
 }
 
-function getColor(value: number, thresholds: [number, number]) {
-  if (value >= thresholds[1]) return "text-[#00FF88]";
-  if (value >= thresholds[0]) return "text-yellow-400";
+// Couleur pour FPS "plus haut = mieux"
+function colorFPS(fps: number): string {
+  if (fps >= 55) return "text-[#00FF88]";
+  if (fps >= 30) return "text-yellow-400";
   return "text-red-400";
 }
 
 export default function PerfBadge() {
-  const [perf, setPerf] = useState<PerfData>({ fps: 60, memory: null, lighthouseScore: 100 });
+  const [perf, setPerf] = useState<PerfData>({
+    fps: 60,
+    memory: null,
+    ttfb: null,
+    fcp: null,
+    lcp: null,
+  });
   const [isExpanded, setIsExpanded] = useState(false);
   const frameCount = useRef(0);
   const lastTime = useRef(performance.now());
   const rafId = useRef<number>(0);
 
+  // FPS loop — requestAnimationFrame
   useEffect(() => {
     const updateFPS = () => {
       frameCount.current++;
@@ -52,11 +58,11 @@ export default function PerfBadge() {
           .memory?.usedJSHeapSize;
         const memMB = mem ? Math.round(mem / 1024 / 1024) : null;
 
-        setPerf({
+        setPerf((prev) => ({
+          ...prev,
           fps: Math.min(fps, 144),
           memory: memMB,
-          lighthouseScore: estimateLighthouse(fps, memMB),
-        });
+        }));
       }
 
       rafId.current = requestAnimationFrame(updateFPS);
@@ -66,8 +72,52 @@ export default function PerfBadge() {
     return () => cancelAnimationFrame(rafId.current);
   }, []);
 
-  const lhColor = getColor(perf.lighthouseScore, [50, 90]);
-  const fpsColor = getColor(perf.fps, [30, 55]);
+  // TTFB + FCP + LCP — one-shot au mount via PerformanceObserver + Navigation Timing
+  useEffect(() => {
+    // TTFB via Navigation Timing API
+    const navEntries = performance.getEntriesByType("navigation");
+    if (navEntries.length > 0) {
+      const nav = navEntries[0] as PerformanceNavigationTiming;
+      setPerf((prev) => ({ ...prev, ttfb: Math.round(nav.responseStart) }));
+    }
+
+    // FCP via PerformanceObserver (paint entries)
+    let fcpObserver: PerformanceObserver | null = null;
+    try {
+      fcpObserver = new PerformanceObserver((list) => {
+        const entry = list.getEntriesByName("first-contentful-paint")[0];
+        if (entry) {
+          setPerf((prev) => ({ ...prev, fcp: Math.round(entry.startTime) }));
+          fcpObserver?.disconnect();
+        }
+      });
+      fcpObserver.observe({ type: "paint", buffered: true });
+    } catch {
+      // PerformanceObserver non supporté
+    }
+
+    // LCP via PerformanceObserver (largest-contentful-paint)
+    let lcpObserver: PerformanceObserver | null = null;
+    try {
+      lcpObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        if (entries.length > 0) {
+          const last = entries[entries.length - 1];
+          setPerf((prev) => ({ ...prev, lcp: Math.round(last.startTime) }));
+        }
+      });
+      lcpObserver.observe({ type: "largest-contentful-paint", buffered: true });
+    } catch {
+      // PerformanceObserver non supporté
+    }
+
+    return () => {
+      fcpObserver?.disconnect();
+      lcpObserver?.disconnect();
+    };
+  }, []);
+
+  const fpsColor = colorFPS(perf.fps);
 
   return (
     <motion.div
@@ -81,14 +131,15 @@ export default function PerfBadge() {
         className="flex items-center gap-2 px-3 py-2 bg-dev-surface border border-dev-border rounded-lg font-mono text-xs hover:border-dev-accent/40 transition-colors"
         title="Performance monitor"
       >
-        {/* Indicateur FPS compact */}
         <span className={fpsColor}>{perf.fps}</span>
         <span className="text-dev-muted">fps</span>
-        <span className="text-dev-muted">·</span>
-        <span className={lhColor}>
-          {perf.lighthouseScore}
-        </span>
-        <span className="text-dev-muted text-[10px]">⚡</span>
+        {perf.memory !== null && (
+          <>
+            <span className="text-dev-muted">·</span>
+            <span className="text-dev-text">{perf.memory}</span>
+            <span className="text-dev-muted">MB</span>
+          </>
+        )}
       </button>
 
       {/* Panneau détaillé */}
@@ -96,7 +147,7 @@ export default function PerfBadge() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute bottom-full right-0 mb-2 w-48 bg-dev-surface border border-dev-border rounded-lg p-3 font-mono text-xs"
+          className="absolute bottom-full right-0 mb-2 w-52 bg-dev-surface border border-dev-border rounded-lg p-3 font-mono text-xs"
         >
           <p className="text-dev-muted mb-2 uppercase tracking-widest text-[10px]">
             Live Performance
@@ -117,16 +168,31 @@ export default function PerfBadge() {
                 bar={Math.min(perf.memory / 150, 1)}
               />
             )}
+            {/* TTFB — seuils W3C : vert < 100ms, jaune < 500ms, rouge ≥ 500ms */}
             <PerfRow
-              label="Lighthouse~"
-              value={`${perf.lighthouseScore}`}
-              color={lhColor}
-              bar={perf.lighthouseScore / 100}
+              label="TTFB"
+              value={perf.ttfb !== null ? `${perf.ttfb} ms` : "—"}
+              color={perf.ttfb !== null ? colorLow(perf.ttfb, 100, 500) : "text-dev-muted"}
+              bar={perf.ttfb !== null ? Math.min(perf.ttfb / 500, 1) : 0}
+            />
+            {/* FCP — seuils W3C : vert < 1800ms, jaune < 3000ms, rouge ≥ 3000ms */}
+            <PerfRow
+              label="FCP"
+              value={perf.fcp !== null ? `${perf.fcp} ms` : "—"}
+              color={perf.fcp !== null ? colorLow(perf.fcp, 1800, 3000) : "text-dev-muted"}
+              bar={perf.fcp !== null ? Math.min(perf.fcp / 3000, 1) : 0}
+            />
+            {/* LCP — seuils W3C : vert < 2500ms, jaune < 4000ms, rouge ≥ 4000ms */}
+            <PerfRow
+              label="LCP"
+              value={perf.lcp !== null ? `${perf.lcp} ms` : "—"}
+              color={perf.lcp !== null ? colorLow(perf.lcp, 2500, 4000) : "text-dev-muted"}
+              bar={perf.lcp !== null ? Math.min(perf.lcp / 4000, 1) : 0}
             />
           </div>
 
           <p className="text-dev-muted/50 text-[9px] mt-3">
-            * Score Lighthouse estimé
+            // métriques réelles — PerformanceObserver + Navigation Timing
           </p>
         </motion.div>
       )}
@@ -153,7 +219,7 @@ function PerfRow({
       </div>
       <div className="h-0.5 bg-dev-surface-2 rounded-full overflow-hidden">
         <div
-          className={`h-full transition-all duration-500 ${color.replace("text-", "bg-").replace("text-[#00FF88]", "bg-[#00FF88]")}`}
+          className={`h-full transition-all duration-500 ${color.replace("text-", "bg-")}`}
           style={{ width: `${Math.min(bar * 100, 100)}%` }}
         />
       </div>

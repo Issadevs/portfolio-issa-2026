@@ -15,6 +15,11 @@ interface ProjectsDevProps {
 
 type ProjectId = "sfr" | "bookreco" | "petfinder" | "cproject";
 
+interface ProjectEvaluation {
+  dataset: { fr: string; en: string };
+  protocol: { fr: string; en: string };
+}
+
 const projects: {
   id: ProjectId;
   starred: boolean;
@@ -24,6 +29,7 @@ const projects: {
   architecture: { fr: string; en: string };
   challenges: { fr: string[]; en: string[] };
   metrics: { label: string; value: string }[];
+  evaluation?: ProjectEvaluation;
 }[] = [
   {
     id: "sfr",
@@ -51,6 +57,16 @@ const projects: {
       { label: "Faux positifs réduits", value: "-40%" },
       { label: "Uptime pipeline", value: "99.7%" },
     ],
+    evaluation: {
+      dataset: {
+        fr: "Données de production SFR — télémétrie SI interne (confidentiel, non publiable)",
+        en: "SFR production data — internal IS telemetry (confidential, not publishable)",
+      },
+      protocol: {
+        fr: "Calibration du seuil IsolationForest sur 3 mois d'historique, validation par réduction des alertes faux positifs",
+        en: "IsolationForest threshold calibrated on 3 months of history, validated by false positive alert reduction",
+      },
+    },
     snippet: {
       lang: "python",
       code: `# Détection d'anomalies en temps réel — pipeline SFR
@@ -103,6 +119,16 @@ def consume_and_detect(topic: str, model: IsolationForest, es: Elasticsearch):
       { label: "NDCG@10", value: "0.74" },
       { label: "Livres indexés", value: "50k+" },
     ],
+    evaluation: {
+      dataset: {
+        fr: "50 000 livres — Books-Crossing dataset (Kaggle) | TODO: vérifier URL exacte",
+        en: "50 000 books — Books-Crossing dataset (Kaggle) | TODO: verify exact URL",
+      },
+      protocol: {
+        fr: "Split 80/20, top-k = 10, métriques Precision@10 et NDCG@10 calculées sur le jeu de test",
+        en: "80/20 split, top-k = 10, Precision@10 and NDCG@10 computed on the test set",
+      },
+    },
     snippet: {
       lang: "python",
       code: `# Approche hybride : content-based + collaborative filtering
@@ -160,6 +186,16 @@ class HybridRecommender:
       { label: "Endpoints REST", value: "18" },
       { label: "Coverage tests", value: "76%" },
     ],
+    evaluation: {
+      dataset: {
+        fr: "Dataset interne — base MySQL peuplée manuellement pour les tests (TODO: nombre exact de fixtures)",
+        en: "Internal dataset — MySQL database manually seeded for testing (TODO: exact fixture count)",
+      },
+      protocol: {
+        fr: "Tests unitaires JUnit 5 + MockMvc, coverage mesuré par JaCoCo (76%)",
+        en: "Unit tests JUnit 5 + MockMvc, coverage measured with JaCoCo (76%)",
+      },
+    },
     snippet: {
       lang: "xml",
       code: `<!-- MyBatis dynamic SQL — recherche multicritères -->
@@ -210,6 +246,16 @@ class HybridRecommender:
       { label: "Lignes de code", value: "~900" },
       { label: "Dépendances", value: "0" },
     ],
+    evaluation: {
+      dataset: {
+        fr: "Dataset maison — ~50 films/livres encodés manuellement avec vecteurs d'humeur (TODO: publier)",
+        en: "Handcrafted dataset — ~50 movies/books manually encoded with mood vectors (TODO: publish)",
+      },
+      protocol: {
+        fr: "Validation manuelle des Top-3 recommandations, 0 memory leaks validé par Valgrind",
+        en: "Manual Top-3 recommendations validation, 0 memory leaks verified with Valgrind",
+      },
+    },
     snippet: {
       lang: "c",
       code: `/* Cosinus similarity entre vecteur humeur et profil média — pur C */
@@ -348,6 +394,25 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
                 ))}
               </ul>
             </div>
+
+            {/* Dataset & Protocole d'évaluation */}
+            {project.evaluation && (
+              <div className="bg-dev-surface border border-dev-border rounded-xl p-5">
+                <p className="text-dev-accent text-xs font-mono mb-3">
+                  {"// "}{lang === "fr" ? "Jeu de données & protocole" : "Dataset & protocol"}
+                </p>
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <span className="text-dev-muted font-mono">dataset: </span>
+                    <span className="text-dev-text">{project.evaluation.dataset[lang]}</span>
+                  </div>
+                  <div>
+                    <span className="text-dev-muted font-mono">protocol: </span>
+                    <span className="text-dev-text">{project.evaluation.protocol[lang]}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Métriques */}
             <div className="grid grid-cols-3 gap-3">

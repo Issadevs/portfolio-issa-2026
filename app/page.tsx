@@ -5,6 +5,7 @@
 // Le WebGL background est importé dynamiquement (ssr: false) car Three.js est client-only
 
 import dynamic from "next/dynamic";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMode } from "@/hooks/useMode";
 import { useLang } from "@/hooks/useLang";
@@ -22,13 +23,11 @@ import ProjectsCV from "@/components/cv/ProjectsCV";
 import MotivationCV from "@/components/cv/MotivationCV";
 import ContactCV from "@/components/cv/ContactCV";
 
-// Composants Dev Mode
+// Composants Dev Mode (statiques — premier paint)
 import HeroDev from "@/components/dev/HeroDev";
 import ProjectsDev from "@/components/dev/ProjectsDev";
 import StackDev from "@/components/dev/StackDev";
-import GitHubFeed from "@/components/dev/GitHubFeed";
 import Terminal from "@/components/dev/Terminal";
-import PerfBadge from "@/components/dev/PerfBadge";
 
 // Dynamic import obligatoire pour Three.js (client-only, pas de SSR)
 const WebGLBackground = dynamic(
@@ -36,20 +35,80 @@ const WebGLBackground = dynamic(
   { ssr: false, loading: () => null }
 );
 
+// Chargés après requestIdleCallback pour ne pas bloquer le first paint
+const GitHubFeed = dynamic(
+  () => import("@/components/dev/GitHubFeed"),
+  { ssr: false, loading: () => <GitHubFeedSkeleton /> }
+);
+
+const PerfBadge = dynamic(
+  () => import("@/components/dev/PerfBadge"),
+  { ssr: false, loading: () => null }
+);
+
+function GitHubFeedSkeleton() {
+  return (
+    <section className="py-20 px-4 relative z-10">
+      <div className="max-w-5xl mx-auto">
+        <div className="h-3 w-28 bg-dev-surface-2 rounded animate-pulse mb-3" />
+        <div className="h-6 w-44 bg-dev-surface-2 rounded animate-pulse mb-6" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-12 bg-dev-surface rounded-xl animate-pulse"
+              style={{ opacity: 1 - i * 0.15 }}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
 export default function Portfolio() {
   const { mode, toggleMode, isGlitching } = useMode();
   const { lang, toggleLang, t, isTransitioning } = useLang();
   const terminal = useTerminal(lang);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const [idleReady, setIdleReady] = useState(false);
 
   const isDev = mode === "dev";
+
+  // Différer WebGL + GitHubFeed + PerfBadge après idle pour ne pas bloquer le first paint
+  useEffect(() => {
+    if (!isDev) {
+      setIdleReady(false);
+      return;
+    }
+    if ("requestIdleCallback" in window) {
+      const id = requestIdleCallback(() => setIdleReady(true), { timeout: 2000 });
+      return () => cancelIdleCallback(id);
+    } else {
+      const id = setTimeout(() => setIdleReady(true), 300);
+      return () => clearTimeout(id);
+    }
+  }, [isDev]);
 
   return (
     <>
       {/* Transition glitch entre modes */}
       <GlitchTransition isActive={isGlitching} targetMode={isDev ? "dev" : "cv"} />
 
-      {/* Background WebGL (Dev Mode uniquement) */}
-      {isDev && <WebGLBackground />}
+      {/* Background WebGL — seulement si pas prefers-reduced-motion + idle */}
+      {isDev && !prefersReducedMotion && idleReady && <WebGLBackground />}
 
       {/* Grille CSS de fond (Dev Mode) */}
       {isDev && <div className="fixed inset-0 z-[1] dev-grid pointer-events-none" />}
@@ -117,7 +176,13 @@ export default function Portfolio() {
               />
               <ProjectsDev t={t} lang={lang} />
               <StackDev t={t} lang={lang} />
-              <GitHubFeed lang={lang} />
+
+              {/* GitHubFeed — après idle */}
+              {idleReady ? (
+                <GitHubFeed lang={lang} />
+              ) : (
+                <GitHubFeedSkeleton />
+              )}
 
               {/* Footer Dev */}
               <footer className="py-8 px-4 border-t border-dev-border relative z-10">
@@ -130,8 +195,8 @@ export default function Portfolio() {
               {/* Terminal (Ctrl+K) */}
               <Terminal {...terminal} t={t} />
 
-              {/* Badge performance */}
-              <PerfBadge />
+              {/* Badge performance — après idle */}
+              {idleReady && <PerfBadge />}
             </motion.div>
           )}
         </AnimatePresence>

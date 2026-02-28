@@ -108,7 +108,10 @@
       "description": "IS performance dashboard with real-time anomaly detection. Presented to SFR management.",
       "impact": "Full pipeline Kafka → ES → ML → alerting, in production environment",
       "stack": ["Python/Flask", "Kafka", "Elasticsearch", "Prometheus", "ML"]
-    }
+    },
+    "evaluation_section": "Dataset & protocol",
+    "evaluation_dataset_label": "Dataset",
+    "evaluation_protocol_label": "Protocol"
   },
   "motivation": {
     "title": "What drives me",
