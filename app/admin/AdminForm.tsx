@@ -5,7 +5,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { updateSettings, signOut } from "./actions";
+import { updateSettings } from "./actions";
 import type { PortfolioSettings } from "@/lib/settings";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
 
@@ -192,7 +192,7 @@ export default function AdminForm({
                 <div className="w-10 h-5 bg-gray-800 rounded-full peer-checked:bg-[#00FF88]/20 border border-gray-700 peer-checked:border-[#00FF88]/40 transition-all" />
                 <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-gray-500 rounded-full peer-checked:translate-x-5 peer-checked:bg-[#00FF88] transition-all" />
                 <span className="text-gray-300 text-sm font-mono">
-                  Afficher le bouton "Me contacter" sur le Hero
+                  {'Afficher le bouton "Me contacter" sur le Hero'}
                 </span>
               </label>
             </div>

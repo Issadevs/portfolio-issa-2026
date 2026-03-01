@@ -192,7 +192,7 @@ export default function PerfBadge() {
           </div>
 
           <p className="text-dev-muted/50 text-[9px] mt-3">
-            // métriques réelles — PerformanceObserver + Navigation Timing
+            {"// métriques réelles — PerformanceObserver + Navigation Timing"}
           </p>
         </motion.div>
       )}
