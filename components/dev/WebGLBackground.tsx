@@ -89,7 +89,11 @@ export default function WebGLBackground() {
     const mouse       = new THREE.Vector2(0, 0);
     const targetMouse = new THREE.Vector2(0, 0);
 
+    let lastMouseTime = 0;
     const onMouseMove = (e: MouseEvent) => {
+      const now = Date.now();
+      if (now - lastMouseTime < 16) return; // throttle ~60fps
+      lastMouseTime = now;
       const rect = container.getBoundingClientRect();
       targetMouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
       targetMouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;

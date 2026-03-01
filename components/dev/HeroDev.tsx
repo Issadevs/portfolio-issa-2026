@@ -1,16 +1,20 @@
 "use client";
 
 // Hero Dev Mode : présentation technique avec style terminal
-// Choix : animation typewriter sur la phrase signature, style CLI authentique
+// La ligne "status" est dynamique (pilotée par portfolio_settings)
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import type { Lang } from "@/hooks/useLang";
+import type { PortfolioSettings } from "@/lib/settings";
+import ProfileAvatar from "@/components/shared/ProfileAvatar";
+import { formatAvailableDate } from "@/lib/date";
 
 interface HeroDevProps {
   t: (key: string) => string;
   lang: Lang;
   onOpenTerminal: () => void;
+  settings: PortfolioSettings;
 }
 
 function useTypewriter(text: string, speed = 40) {
@@ -36,17 +40,84 @@ function useTypewriter(text: string, speed = 40) {
   return { displayed, done };
 }
 
-export default function HeroDev({ t, lang, onOpenTerminal }: HeroDevProps) {
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function getStatusValue(
+  settings: PortfolioSettings,
+  lang: Lang,
+  t: (key: string) => string
+): string {
+  const contract = t(
+    `status.contract.${settings.contract_type.toLowerCase()}`
+  );
+
+  if (settings.status === "NOT_LOOKING") {
+    return `"${t("status.not_looking")}"`;
+  }
+
+  if (settings.status === "SOON") {
+    if (settings.available_from) {
+      const dateStr = formatAvailableDate(settings.available_from, lang, "short");
+      return lang === "fr"
+        ? `"${contract} dès ${dateStr}"`
+        : `"${contract} from ${dateStr}"`;
+    }
+    return lang === "fr"
+      ? `"${contract} — Bientôt disponible"`
+      : `"${contract} — Coming soon"`;
+  }
+
+  // OPEN
+  return lang === "fr"
+    ? `"${contract} — Disponible maintenant"`
+    : `"${contract} — Available now"`;
+}
+
+// ─── Composant ────────────────────────────────────────────────────────────────
+
+export default function HeroDev({
+  t,
+  lang,
+  onOpenTerminal,
+  settings,
+}: HeroDevProps) {
   const signature = t("hero.signature");
   const { displayed, done } = useTypewriter(signature, 35);
 
+  const statusValue = getStatusValue(settings, lang, t);
+
   const lines = [
-    { label: "const", key: "name", value: '"Issa KANE"', color: "text-yellow-300" },
-    { label: "const", key: "role", value: lang === "fr" ? '"Ingénieur IA & Data"' : '"AI & Data Engineer"', color: "text-green-300" },
-    { label: "const", key: "school", value: '"EFREI Paris — Master 1"', color: "text-blue-300" },
-    { label: "const", key: "status", value: lang === "fr" ? '"Alternance dès fév. 2026"' : '"Apprenticeship from Feb 2026"', color: "text-dev-accent" },
-    { label: "const", key: "age", value: '"22 ans / 22 years old"', color: "text-orange-300" },
-    { label: "const", key: "location", value: '"Villejuif (94), Île-de-France"', color: "text-purple-300" },
+    {
+      label: "const",
+      key: "name",
+      value: '"Issa KANE"',
+      color: "text-yellow-300",
+    },
+    {
+      label: "const",
+      key: "role",
+      value:
+        lang === "fr" ? '"Ingénieur IA & Data"' : '"AI & Data Engineer"',
+      color: "text-green-300",
+    },
+    {
+      label: "const",
+      key: "school",
+      value: '"EFREI Paris — Master 1"',
+      color: "text-blue-300",
+    },
+    {
+      label: "const",
+      key: "status",
+      value: statusValue, // ← dynamique
+      color: "text-dev-accent",
+    },
+    {
+      label: "const",
+      key: "location",
+      value: `"${settings.location}"`, // ← dynamique
+      color: "text-purple-300",
+    },
   ];
 
   return (
@@ -66,7 +137,10 @@ export default function HeroDev({ t, lang, onOpenTerminal }: HeroDevProps) {
               <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
               <div className="w-3 h-3 rounded-full bg-green-500/70" />
             </div>
-            <span className="text-dev-muted text-xs font-mono">issa.kane — portfolio.ts</span>
+            <ProfileAvatar size={28} priority />
+            <span className="text-dev-muted text-xs font-mono">
+              issa.kane — portfolio.ts
+            </span>
           </div>
 
           {/* Contenu code */}

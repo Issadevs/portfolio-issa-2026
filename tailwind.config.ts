@@ -1,18 +1,15 @@
 import type { Config } from "tailwindcss";
 
-// Tailwind config enrichi pour les deux modes (CV clair + Dev sombre)
 const config: Config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  // darkMode class permet de switch programmatiquement via le hook useMode
   darkMode: "class",
   theme: {
     extend: {
       colors: {
-        // CV Mode palette : neutrals + accent bleu profond
         cv: {
           bg: "#FAFAFA",
           surface: "#FFFFFF",
@@ -22,7 +19,6 @@ const config: Config = {
           "accent-light": "#3B82F6",
           border: "#E5E7EB",
         },
-        // Dev Mode palette : dark profond + néon vert/cyan
         dev: {
           bg: "#050810",
           surface: "#0D1117",
@@ -37,9 +33,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        // Variable fonts pour CV Mode — élégance typographique
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        // Monospace pour Dev Mode — authenticité technique
         mono: ["var(--font-jetbrains)", "Fira Code", "monospace"],
         display: ["var(--font-inter)", "system-ui", "sans-serif"],
       },

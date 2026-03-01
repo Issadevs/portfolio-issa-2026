@@ -1,32 +1,74 @@
 "use client";
 
-// Section Contact CV Mode — formulaire + infos de contact
-// Choix : formulaire HTML natif (pas de lib externe), accessible et simple
+// Section Contact CV Mode — formulaire connecté à /api/contact (Resend)
+// Anti-spam : honeypot (champ website caché) + rate limit côté serveur
 
 import { motion } from "framer-motion";
 import { useState } from "react";
+import type { PortfolioSettings } from "@/lib/settings";
+import type { Lang } from "@/hooks/useLang";
 
 interface ContactCVProps {
   t: (key: string) => string;
+  settings: PortfolioSettings;
+  lang: Lang;
 }
 
-export default function ContactCV({ t }: ContactCVProps) {
-  const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
+type FormStatus = "idle" | "sending" | "sent" | "error";
+
+export default function ContactCV({ t, settings, lang }: ContactCVProps) {
+  const [status, setStatus] = useState<FormStatus>("idle");
+  const [errorMsg, setErrorMsg] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     company: "",
     message: "",
+    website: "", // honeypot — invisible aux humains, rempli par les bots
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("sending");
-    // Simulation d'envoi — à connecter à une API route ou Resend/Formspree
-    await new Promise((r) => setTimeout(r, 1200));
-    setStatus("sent");
-    setFormData({ name: "", email: "", company: "", message: "" });
-    setTimeout(() => setStatus("idle"), 4000);
+    setErrorMsg("");
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          company: formData.company,
+          message: formData.message,
+          website: formData.website,
+        }),
+      });
+
+      if (res.status === 429) {
+        setErrorMsg(t("contact.form.error_rate_limit"));
+        setStatus("error");
+        setTimeout(() => setStatus("idle"), 6000);
+        return;
+      }
+
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+
+      if (!res.ok) {
+        setErrorMsg(data.error ?? t("contact.form.error_generic"));
+        setStatus("error");
+        setTimeout(() => setStatus("idle"), 6000);
+        return;
+      }
+
+      setStatus("sent");
+      setFormData({ name: "", email: "", company: "", message: "", website: "" });
+      setTimeout(() => setStatus("idle"), 5000);
+    } catch {
+      setErrorMsg(t("contact.form.error_generic"));
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 6000);
+    }
   };
 
   return (
@@ -52,11 +94,17 @@ export default function ContactCV({ t }: ContactCVProps) {
             viewport={{ once: true }}
             className="space-y-5"
           >
-            <InfoItem icon="📅" label={t("contact.availability")} />
-            <InfoItem icon="🔄" label={t("contact.rhythm")} />
-            <InfoItem icon="📍" label={t("contact.location")} />
-            <InfoItem icon="✉️" label="issa.kane@efrei.net" href="mailto:issa.kane@efrei.net" />
-            <InfoItem icon="📞" label="06 52 52 72 14" href="tel:+33652527214" />
+            <InfoItem icon="📍" label={settings.location} />
+            <InfoItem
+              icon="✉️"
+              label="issa.kane@efrei.net"
+              href="mailto:issa.kane@efrei.net"
+            />
+            <InfoItem
+              icon="📞"
+              label="06 52 52 72 14"
+              href="tel:+33652527214"
+            />
 
             {/* Liens sociaux */}
             <div className="flex gap-4 pt-2">
@@ -89,6 +137,26 @@ export default function ContactCV({ t }: ContactCVProps) {
             viewport={{ once: true }}
             className="space-y-4"
           >
+            {/* Honeypot — caché visuellement, ignoré par les vrais utilisateurs */}
+            <input
+              type="text"
+              name="website"
+              value={formData.website}
+              onChange={(e) =>
+                setFormData({ ...formData, website: e.target.value })
+              }
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: "-9999px",
+                height: 0,
+                width: 0,
+                overflow: "hidden",
+              }}
+            />
+
             <div className="grid grid-cols-2 gap-4">
               <InputField
                 label={t("contact.form.name")}
@@ -124,17 +192,29 @@ export default function ContactCV({ t }: ContactCVProps) {
                 className="w-full px-3 py-2.5 border border-cv-border rounded-lg text-sm text-cv-text bg-cv-surface focus:outline-none focus:border-cv-accent resize-none placeholder:text-cv-muted/50"
               />
             </div>
+
+            {/* Feedback d'erreur */}
+            {status === "error" && (
+              <motion.p
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2"
+              >
+                {errorMsg}
+              </motion.p>
+            )}
+
             <motion.button
               type="submit"
-              disabled={status !== "idle"}
+              disabled={status === "sending" || status === "sent"}
               className="w-full py-3 bg-cv-accent text-white rounded-lg text-sm font-medium hover:bg-cv-accent-light transition-colors disabled:opacity-60"
               whileTap={{ scale: 0.98 }}
             >
-              {status === "idle"
-                ? t("contact.form.send")
-                : status === "sending"
+              {status === "sending"
                 ? t("contact.form.sending")
-                : `✓ ${t("contact.form.success")}`}
+                : status === "sent"
+                  ? `✓ ${t("contact.form.success")}`
+                  : t("contact.form.send")}
             </motion.button>
           </motion.form>
         </div>

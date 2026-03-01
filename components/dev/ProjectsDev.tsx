@@ -1,9 +1,5 @@
 "use client";
 
-// Projets Dev Mode : version technique détaillée avec snippets de code
-// Choix : Shiki pour la coloration syntaxique côté serveur (injecté via dangerouslySetInnerHTML)
-// Les snippets sont hardcodés ici pour éviter une dépendance filesystem côté client
-
 import { motion } from "framer-motion";
 import { useState } from "react";
 import type { Lang } from "@/hooks/useLang";
@@ -121,8 +117,8 @@ def consume_and_detect(topic: str, model: IsolationForest, es: Elasticsearch):
     ],
     evaluation: {
       dataset: {
-        fr: "50 000 livres — Books-Crossing dataset (Kaggle) | TODO: vérifier URL exacte",
-        en: "50 000 books — Books-Crossing dataset (Kaggle) | TODO: verify exact URL",
+        fr: "50 000 livres | Books-Crossing dataset (Kaggle)",
+        en: "50,000 books | Books-Crossing dataset (Kaggle)",
       },
       protocol: {
         fr: "Split 80/20, top-k = 10, métriques Precision@10 et NDCG@10 calculées sur le jeu de test",
@@ -188,8 +184,8 @@ class HybridRecommender:
     ],
     evaluation: {
       dataset: {
-        fr: "Dataset interne — base MySQL peuplée manuellement pour les tests (TODO: nombre exact de fixtures)",
-        en: "Internal dataset — MySQL database manually seeded for testing (TODO: exact fixture count)",
+        fr: "Dataset interne | base MySQL peuplée manuellement pour les tests",
+        en: "Internal dataset | MySQL database manually seeded for testing",
       },
       protocol: {
         fr: "Tests unitaires JUnit 5 + MockMvc, coverage mesuré par JaCoCo (76%)",
@@ -248,8 +244,8 @@ class HybridRecommender:
     ],
     evaluation: {
       dataset: {
-        fr: "Dataset maison — ~50 films/livres encodés manuellement avec vecteurs d'humeur (TODO: publier)",
-        en: "Handcrafted dataset — ~50 movies/books manually encoded with mood vectors (TODO: publish)",
+        fr: "Dataset perso | ~50 films/livres encodés manuellement avec vecteurs d'humeur",
+        en: "Custom dataset | ~50 movies/books manually encoded with mood vectors",
       },
       protocol: {
         fr: "Validation manuelle des Top-3 recommandations, 0 memory leaks validé par Valgrind",
@@ -312,7 +308,6 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
           </h3>
         </motion.div>
 
-        {/* Tabs */}
         <div className="flex flex-wrap gap-2 mb-6">
           {projects.map((p) => (
             <button
@@ -330,7 +325,6 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
           ))}
         </div>
 
-        {/* Contenu projet */}
         <motion.div
           key={active}
           initial={{ opacity: 0, y: 10 }}
@@ -338,9 +332,7 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
           transition={{ duration: 0.3 }}
           className="grid lg:grid-cols-2 gap-6"
         >
-          {/* Colonne gauche : infos */}
           <div className="space-y-4">
-            {/* Header */}
             <div className="bg-dev-surface border border-dev-border rounded-xl p-5">
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-2xl">{project.icon}</span>
@@ -357,7 +349,6 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
                 {t(`projects.${project.id}.description`)}
               </p>
 
-              {/* Stack badges */}
               <div className="flex flex-wrap gap-1.5 mt-3">
                 {project.stack.map((tech) => (
                   <span
@@ -370,20 +361,18 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
               </div>
             </div>
 
-            {/* Architecture */}
             <div className="bg-dev-surface border border-dev-border rounded-xl p-5">
               <p className="text-dev-accent text-xs font-mono mb-2">
-                {"// Architecture"}
+                {"Architecture"}
               </p>
               <p className="text-dev-muted text-sm font-mono leading-relaxed">
                 {project.architecture[lang]}
               </p>
             </div>
 
-            {/* Challenges */}
             <div className="bg-dev-surface border border-dev-border rounded-xl p-5">
               <p className="text-dev-accent text-xs font-mono mb-3">
-                {lang === "fr" ? "// Défis & Solutions" : "// Challenges & Solutions"}
+                {lang === "fr" ? "Défis et solutions" : "Challenges and solutions"}
               </p>
               <ul className="space-y-2">
                 {project.challenges[lang].map((c, i) => (
@@ -395,11 +384,10 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
               </ul>
             </div>
 
-            {/* Dataset & Protocole d'évaluation */}
             {project.evaluation && (
               <div className="bg-dev-surface border border-dev-border rounded-xl p-5">
                 <p className="text-dev-accent text-xs font-mono mb-3">
-                  {"// "}{lang === "fr" ? "Jeu de données & protocole" : "Dataset & protocol"}
+                  {lang === "fr" ? "Jeu de données et protocole" : "Dataset and protocol"}
                 </p>
                 <div className="space-y-2 text-xs">
                   <div>
@@ -414,7 +402,6 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
               </div>
             )}
 
-            {/* Métriques */}
             <div className="grid grid-cols-3 gap-3">
               {project.metrics.map((m) => (
                 <div
@@ -430,7 +417,6 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
             </div>
           </div>
 
-          {/* Colonne droite : snippet de code */}
           <div className="bg-dev-surface border border-dev-border rounded-xl overflow-hidden">
             <div className="flex items-center gap-3 px-4 py-2.5 border-b border-dev-border bg-dev-surface-2">
               <div className="flex gap-1.5">
@@ -458,10 +444,7 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
   );
 }
 
-// Coloration syntaxique légère sans Shiki côté client (évite le bundle client lourd)
-// Shiki est utilisé pour les cas où le code est prérendu côté serveur
 function CodeHighlight({ code, lang: language }: { code: string; lang: string }) {
-  // Tokenisation simple avec regex pour les cas clients
   const tokens = tokenize(code, language);
   return (
     <>
@@ -487,7 +470,6 @@ function tokenize(code: string, _lang: string): Token[] {
     const line = lines[li];
     if (li > 0) tokens.push({ text: "\n", className: "" });
 
-    // Commentaires
     const commentMatch = line.match(/^(\s*)(#.*|\/\/.*|\/\*.*\*\/|<!--.*-->)(.*)$/);
     if (commentMatch) {
       if (commentMatch[1]) tokens.push({ text: commentMatch[1], className: "text-dev-text" });
@@ -496,10 +478,8 @@ function tokenize(code: string, _lang: string): Token[] {
       continue;
     }
 
-    // Traitement token par token avec regex
     let remaining = line;
     while (remaining.length > 0) {
-      // Strings
       const strMatch = remaining.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/);
       if (strMatch) {
         tokens.push({ text: strMatch[1], className: "text-yellow-300" });
@@ -507,7 +487,6 @@ function tokenize(code: string, _lang: string): Token[] {
         continue;
       }
 
-      // Keywords
       const kwMatch = remaining.match(
         /^(def|class|return|import|from|if|else|elif|for|in|and|or|not|True|False|None|self|const|let|var|function|async|await|new|void|int|float|char|struct|malloc|free|sizeof)\b/
       );
@@ -517,7 +496,6 @@ function tokenize(code: string, _lang: string): Token[] {
         continue;
       }
 
-      // Numbers
       const numMatch = remaining.match(/^(\d+\.?\d*)/);
       if (numMatch) {
         tokens.push({ text: numMatch[1], className: "text-orange-300" });
@@ -525,7 +503,6 @@ function tokenize(code: string, _lang: string): Token[] {
         continue;
       }
 
-      // Types / built-ins
       const typeMatch = remaining.match(
         /^(IsolationForest|KafkaConsumer|Elasticsearch|TfidfVectorizer|HybridRecommender|UserMood|MediaDB|ScoredMedia)\b/
       );
@@ -535,7 +512,6 @@ function tokenize(code: string, _lang: string): Token[] {
         continue;
       }
 
-      // Attributs / méthodes
       const attrMatch = remaining.match(/^(\.[a-zA-Z_]\w*)/);
       if (attrMatch) {
         tokens.push({ text: attrMatch[1], className: "text-blue-300" });
@@ -543,7 +519,6 @@ function tokenize(code: string, _lang: string): Token[] {
         continue;
       }
 
-      // Default — caractère par caractère
       tokens.push({ text: remaining[0], className: "text-dev-text" });
       remaining = remaining.slice(1);
     }
