@@ -16,7 +16,7 @@ interface ContactCVProps {
 
 type FormStatus = "idle" | "sending" | "sent" | "error";
 
-export default function ContactCV({ t, settings, lang }: ContactCVProps) {
+export default function ContactCV({ t, settings }: ContactCVProps) {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [formData, setFormData] = useState({
