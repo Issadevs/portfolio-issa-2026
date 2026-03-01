@@ -6,6 +6,7 @@
 import { useState, useCallback, useRef } from "react";
 import { terminalCommands } from "@/lib/terminal/commands";
 import type { Lang } from "./useLang";
+import type { PortfolioSettings } from "@/lib/settings";
 
 export interface TerminalLine {
   id: string;
@@ -15,7 +16,7 @@ export interface TerminalLine {
 
 const COMMANDS = Object.keys(terminalCommands);
 
-export function useTerminal(lang: Lang) {
+export function useTerminal(lang: Lang, settings: PortfolioSettings) {
   const [isOpen, setIsOpen] = useState(false);
   const [lines, setLines] = useState<TerminalLine[]>([]);
   const [input, setInput] = useState("");
@@ -71,7 +72,7 @@ export function useTerminal(lang: Lang) {
 
       const handler = terminalCommands[trimmed as keyof typeof terminalCommands];
       if (handler) {
-        const output = handler(lang);
+        const output = handler(lang, settings);
         if (Array.isArray(output)) {
           output.forEach((line) => addLine(line, "output"));
         } else {
@@ -85,7 +86,7 @@ export function useTerminal(lang: Lang) {
         addLine(notFound, "error");
       }
     },
-    [lang, addLine]
+    [lang, settings, addLine]
   );
 
   // Navigation dans l'historique avec flèches

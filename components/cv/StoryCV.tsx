@@ -4,16 +4,17 @@
 // Choix : timeline verticale avec intersection observer (via Framer Motion viewport)
 
 import { motion } from "framer-motion";
+import BrandLogo from "@/components/shared/BrandLogo";
+import type { BrandKey } from "@/lib/branding";
 
 interface StoryCVProps {
   t: (key: string) => string;
 }
 
-const chapters = [
-  { key: "chapter1", icon: "🎓", color: "border-blue-300" },
-  { key: "chapter2", icon: "⚡", color: "border-cv-accent" },
-  { key: "chapter3", icon: "🤖", color: "border-purple-400" },
-  { key: "chapter4", icon: "🚀", color: "border-green-400" },
+const chapters: { key: string; icon: string; color: string; brandKey?: BrandKey }[] = [
+  { key: "chapter1", icon: "🎓", color: "border-blue-300", brandKey: "aerial" },
+  { key: "chapter2", icon: "⚡", color: "border-cv-accent", brandKey: "sfr" },
+  { key: "chapter3", icon: "🤖", color: "border-purple-400", brandKey: "efrei" },
 ];
 
 export default function StoryCV({ t }: StoryCVProps) {
@@ -59,14 +60,22 @@ export default function StoryCV({ t }: StoryCVProps) {
 
                 {/* Contenu */}
                 <div className="flex-1 pb-2 pt-2">
-                  <div className="flex items-center gap-3 mb-1">
+                  <div className="flex items-center gap-3 mb-1 flex-wrap">
                     <span className="font-mono text-xs text-cv-muted border border-cv-border px-2 py-0.5 rounded">
                       {t(`story.${chapter.key}.year`)}
                     </span>
-                    <h3 className="font-semibold text-cv-text text-base">
-                      {t(`story.${chapter.key}.title`)}
-                    </h3>
+                    {chapter.brandKey && (
+                      <BrandLogo brand={chapter.brandKey} size={32} className="opacity-75" />
+                    )}
                   </div>
+                  <h3 className="font-semibold text-cv-text text-base mb-0.5">
+                    {t(`story.${chapter.key}.title`)}
+                  </h3>
+                  {t(`story.${chapter.key}.role`) !== `story.${chapter.key}.role` && (
+                    <p className="text-xs text-cv-muted mb-1.5">
+                      {t(`story.${chapter.key}.role`)}
+                    </p>
+                  )}
                   <p className="text-cv-muted text-sm leading-relaxed">
                     {t(`story.${chapter.key}.text`)}
                   </p>

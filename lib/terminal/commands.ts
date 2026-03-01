@@ -1,13 +1,20 @@
-// Commandes du terminal — logique séparée de l'UI pour testabilité
-// Chaque commande reçoit la langue courante et retourne string | string[]
-
 import type { Lang } from "@/hooks/useLang";
+import type { PortfolioSettings } from "@/lib/settings";
 
-type CommandHandler = (lang: Lang) => string | string[];
+export type CommandHandler = (lang: Lang, settings: PortfolioSettings) => string | string[];
 type Commands = Record<string, CommandHandler>;
 
+function getAge(): number {
+  return new Date().getFullYear() - 2003;
+}
+
+function padBox(s: string): string {
+  const safe = s.length > 39 ? s.slice(0, 38) + "…" : s;
+  return `│  ${safe.padEnd(39)}│`;
+}
+
 export const terminalCommands: Commands = {
-  help: (lang) =>
+  help: (lang, _settings) =>
     lang === "fr"
       ? [
           "╔═══════════════════════════════════════╗",
@@ -40,38 +47,58 @@ export const terminalCommands: Commands = {
           "  Tip: Tab for autocomplete, ↑↓ for history",
         ],
 
-  whoami: (lang) =>
-    lang === "fr"
-      ? [
-          "┌─────────────────────────────────────────┐",
-          "│  Issa KANE                              │",
-          "│  Ingénieur IA & Data                    │",
-          "│  EFREI Paris — Master 1                 │",
-          "│  22 ans — Villejuif (94800)             │",
-          "│  Alternance dès février 2026            │",
-          "│  3j entreprise / 2j école               │",
-          "└─────────────────────────────────────────┘",
-          "",
-          "  Né au Sénégal 🌍 — Bac S mention AB à Dakar",
-          "  Ingénieur SI chez SFR pendant 2 ans",
-          "  \"J'transforme des données brutes en systèmes intelligents.\"",
-        ]
-      : [
-          "┌─────────────────────────────────────────┐",
-          "│  Issa KANE                              │",
-          "│  AI & Data Engineer                     │",
-          "│  EFREI Paris — Master 1                 │",
-          "│  22 years old — Villejuif (94800)       │",
-          "│  Apprenticeship from February 2026      │",
-          "│  3 days company / 2 days school         │",
-          "└─────────────────────────────────────────┘",
-          "",
-          "  Born in Senegal 🌍 — High school diploma with honors in Dakar",
-          "  Systems engineer at SFR for 2 years",
-          "  \"I turn raw data into intelligent systems.\"",
-        ],
+  whoami: (lang, settings) => {
+    const notLooking = settings.status === "NOT_LOOKING";
+    const showRhythm = settings.contract_type === "ALTERNANCE" && !notLooking;
 
-  projects: (lang) =>
+    if (lang === "fr") {
+      const availLine = notLooking
+        ? padBox("Pas en recherche active")
+        : padBox(settings.headline_fr || "Disponible");
+      const lines: string[] = [
+        "┌─────────────────────────────────────────┐",
+        "│  Issa KANE                              │",
+        "│  Ingénieur IA & Data                    │",
+        "│  EFREI Paris | Master 1                 │",
+        padBox(`${getAge()} ans | ${settings.location}`),
+        availLine,
+      ];
+      if (showRhythm) lines.push(padBox("3j entreprise / 2j école"));
+      lines.push(
+        "└─────────────────────────────────────────┘",
+        "",
+        "  Né au Sénégal 🌍, Bac S mention AB à Dakar",
+        "  Stage commercial chez Aérial Group (2022)",
+        "  Ingénieur SI chez SFR pendant 2 ans (2023-2025)",
+        "  \"Je build des pipelines data et des systèmes ML.\""
+      );
+      return lines;
+    } else {
+      const availLine = notLooking
+        ? padBox("Not actively looking")
+        : padBox(settings.headline_en || "Available");
+      const lines: string[] = [
+        "┌─────────────────────────────────────────┐",
+        "│  Issa KANE                              │",
+        "│  AI & Data Engineer                     │",
+        "│  EFREI Paris | Master 1                 │",
+        padBox(`${getAge()} years old | ${settings.location}`),
+        availLine,
+      ];
+      if (showRhythm) lines.push(padBox("3 days company / 2 days school"));
+      lines.push(
+        "└─────────────────────────────────────────┘",
+        "",
+        "  Born in Senegal 🌍, high school diploma with honors in Dakar",
+        "  Commercial internship at Aérial Group (2022)",
+        "  Systems engineer at SFR for 2 years (2023-2025)",
+        "  \"I build data pipelines and ML systems.\""
+      );
+      return lines;
+    }
+  },
+
+  projects: (lang, _settings) =>
     lang === "fr"
       ? [
           "── PROJETS ──────────────────────────────────",
@@ -82,7 +109,7 @@ export const terminalCommands: Commands = {
           "",
           "  [2] Système de reco livres — IA & Data",
           "      Python + NLP + TF-IDF + Filtrage collaboratif",
-          "      Double approche content-based + collaborative",
+          "      Content-based + collaborative filtering",
           "",
           "  [3] Recommandations en C — Autodidacte",
           "      C pur + structures de données + algos custom",
@@ -103,7 +130,7 @@ export const terminalCommands: Commands = {
           "",
           "  [2] Book Recommendation System — AI & Data",
           "      Python + NLP + TF-IDF + Collaborative Filtering",
-          "      Dual content-based + collaborative approach",
+          "      Content-based + collaborative filtering",
           "",
           "  [3] Recommendations in C — Self-taught",
           "      Pure C + data structures + custom algorithms",
@@ -116,7 +143,7 @@ export const terminalCommands: Commands = {
           "  → Type 'xp' for more details on the SFR project",
         ],
 
-  stack: (lang) =>
+  stack: (lang, _settings) =>
     lang === "fr"
       ? [
           "── STACK TECHNIQUE ──────────────────────────",
@@ -126,7 +153,7 @@ export const terminalCommands: Commands = {
           "",
           "  FRAMEWORKS",
           "  Flask · Spring Boot · Vue.js · Next.js · Laravel",
-          "  LangChain · LangGraph  ← IA générative",
+          "  LangChain · LangGraph",
           "",
           "  DATA & IA",
           "  Pandas · Scikit-learn · NLP · TF-IDF",
@@ -156,7 +183,7 @@ export const terminalCommands: Commands = {
           "",
           "  FRAMEWORKS",
           "  Flask · Spring Boot · Vue.js · Next.js · Laravel",
-          "  LangChain · LangGraph  ← Generative AI",
+          "  LangChain · LangGraph",
           "",
           "  DATA & AI",
           "  Pandas · Scikit-learn · NLP · TF-IDF",
@@ -179,7 +206,7 @@ export const terminalCommands: Commands = {
           "  Three.js · GLSL · Shiki · Monaco Editor",
         ],
 
-  xp: (lang) =>
+  xp: (lang, _settings) =>
     lang === "fr"
       ? [
           "── EXPÉRIENCE ───────────────────────────────",
@@ -196,9 +223,9 @@ export const terminalCommands: Commands = {
           "    Architecture : Flask REST → Kafka Broker → ES Index",
           "                  → Scikit-learn model → Prometheus metrics",
           "",
-          "  ○ Téléprospecteur — SFR Paris",
+          "  ○ Prospecteur commercial — Aérial Group",
           "    Janvier 2022 → Février 2022  (Stage)",
-          "    500 appels/jour · Collecte exigences PME",
+          "    Startup création de sites web · Prospection clients · Vente de solutions digitales",
         ]
       : [
           "── EXPERIENCE ───────────────────────────────",
@@ -215,40 +242,47 @@ export const terminalCommands: Commands = {
           "    Architecture: Flask REST → Kafka Broker → ES Index",
           "                  → Scikit-learn model → Prometheus metrics",
           "",
-          "  ○ Teleprospector — SFR Paris",
+          "  ○ Commercial Prospector — Aérial Group",
           "    January 2022 → February 2022  (Internship)",
-          "    500 calls/day · Collecting SMB requirements",
+          "    Web agency startup · Client prospecting · Selling digital solutions",
         ],
 
-  contact: (lang) =>
-    lang === "fr"
-      ? [
-          "── CONTACT ──────────────────────────────────",
-          "",
-          "  Email    →  issa.kane@efrei.net",
-          "  GitHub   →  github.com/issadevs",
-          "  LinkedIn →  linkedin.com/in/issakane",
-          "  Tél      →  06 52 52 72 14",
-          "",
-          "  Disponible dès février 2026",
-          "  Rythme : 3j entreprise / 2j école",
-          "  Localisation : Villejuif (94800), Île-de-France",
-        ]
-      : [
-          "── CONTACT ──────────────────────────────────",
-          "",
-          "  Email    →  issa.kane@efrei.net",
-          "  GitHub   →  github.com/issadevs",
-          "  LinkedIn →  linkedin.com/in/issakane",
-          "  Phone    →  +33 6 52 52 72 14",
-          "",
-          "  Available from February 2026",
-          "  Schedule: 3 days company / 2 days school",
-          "  Location: Villejuif (94800), Île-de-France",
-        ],
+  contact: (lang, settings) => {
+    const notLooking = settings.status === "NOT_LOOKING";
+    const showRhythm = settings.contract_type === "ALTERNANCE" && !notLooking;
 
-  // Easter egg secret — non listé dans help
-  dakar: (_lang) => [
+    if (lang === "fr") {
+      const lines: string[] = [
+        "── CONTACT ──────────────────────────────────",
+        "",
+        "  Email    →  issa.kane@efrei.net",
+        "  GitHub   →  github.com/issadevs",
+        "  LinkedIn →  linkedin.com/in/issakane",
+        "  Tél      →  06 52 52 72 14",
+        "",
+      ];
+      if (!notLooking) lines.push(`  ${settings.headline_fr || "Disponible"}`);
+      if (showRhythm) lines.push("  Rythme : 3j entreprise / 2j école");
+      lines.push(`  Localisation : ${settings.location}`);
+      return lines;
+    } else {
+      const lines: string[] = [
+        "── CONTACT ──────────────────────────────────",
+        "",
+        "  Email    →  issa.kane@efrei.net",
+        "  GitHub   →  github.com/issadevs",
+        "  LinkedIn →  linkedin.com/in/issakane",
+        "  Phone    →  +33 6 52 52 72 14",
+        "",
+      ];
+      if (!notLooking) lines.push(`  ${settings.headline_en || "Available"}`);
+      if (showRhythm) lines.push("  Schedule: 3 days company / 2 days school");
+      lines.push(`  Location: ${settings.location}`);
+      return lines;
+    }
+  },
+
+  dakar: (_lang, _settings) => [
     "",
     "  ██████████████████████████████████████████",
     "  ██        ██████████████████████████████ ██",
@@ -261,7 +295,7 @@ export const terminalCommands: Commands = {
     "",
     "  🌍 Né à Dakar, Sénégal",
     "  Bac scientifique mention Assez Bien",
-    "  Parti étudier à EFREI Paris — Classe prépa intégrée",
+    "  Parti étudier à EFREI Paris, classe prépa intégrée",
     "",
     "  \"Le Sénégal m'a appris la résilience.",
     "   Paris m'a appris l'ingénierie.",

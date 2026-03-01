@@ -5,6 +5,7 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
+import BrandLogo from "@/components/shared/BrandLogo";
 
 interface ExperienceCVProps {
   t: (key: string) => string;
@@ -53,9 +54,12 @@ export default function ExperienceCV({ t }: ExperienceCVProps) {
                   {t("experience.sfr_engineer.type")}
                 </span>
               </div>
-              <p className="text-cv-accent font-medium text-sm">
-                {t("experience.sfr_engineer.company")}
-              </p>
+              <div className="flex items-center gap-2">
+                <BrandLogo brand="sfr" size={44} />
+                <p className="text-cv-accent font-medium text-sm">
+                  {t("experience.sfr_engineer.company")}
+                </p>
+              </div>
             </div>
             <div className="text-right">
               <p className="text-cv-muted text-sm">
@@ -112,7 +116,7 @@ export default function ExperienceCV({ t }: ExperienceCVProps) {
           </div>
         </motion.div>
 
-        {/* SFR Stage Téléprospecteur */}
+        {/* Aérial Group — Stage prospecteur */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -124,22 +128,25 @@ export default function ExperienceCV({ t }: ExperienceCVProps) {
             <div>
               <div className="flex items-center gap-3 mb-1">
                 <h3 className="text-base font-semibold text-cv-text">
-                  {t("experience.sfr_sales.role")}
+                  {t("experience.aerial_sales.role")}
                 </h3>
                 <span className="text-xs px-2 py-0.5 bg-cv-bg border border-cv-border text-cv-muted rounded-full">
-                  {t("experience.sfr_sales.type")}
+                  {t("experience.aerial_sales.type")}
                 </span>
               </div>
-              <p className="text-cv-muted font-medium text-sm">
-                {t("experience.sfr_sales.company")}
-              </p>
+              <div className="flex items-center gap-2">
+                <BrandLogo brand="aerial" size={44} />
+                <p className="text-cv-muted font-medium text-sm">
+                  {t("experience.aerial_sales.company")}
+                </p>
+              </div>
               <p className="text-cv-muted text-xs mt-2 italic">
-                {t("experience.sfr_sales.impact")}
+                {t("experience.aerial_sales.impact")}
               </p>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="text-cv-muted text-sm">{t("experience.sfr_sales.period")}</p>
-              <p className="text-cv-text text-sm">{t("experience.sfr_sales.duration")}</p>
+              <p className="text-cv-muted text-sm">{t("experience.aerial_sales.period")}</p>
+              <p className="text-cv-text text-sm">{t("experience.aerial_sales.duration")}</p>
             </div>
           </div>
         </motion.div>
