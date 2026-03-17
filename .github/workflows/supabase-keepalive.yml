@@ -1,0 +1,40 @@
+# Keepalive Supabase — évite la suspension pour inactivité (free tier)
+# Lance une requête légère toutes les 72h via l'API REST Supabase
+# Secrets requis dans Settings → Secrets → Actions :
+#   SUPABASE_URL       → ex: https://vwlyiftmwlwksstgymye.supabase.co
+#   SUPABASE_ANON_KEY  → clé publique anon (dashboard Supabase → Project Settings → API)
+
+name: Supabase Keepalive
+
+on:
+  schedule:
+    # Toutes les 72h — lundi, jeudi et dimanche à 08:00 UTC
+    - cron: "0 8 * * 1,4,0"
+  # Déclenchement manuel possible depuis l'onglet Actions
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping REST API
+        run: |
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+
+          echo "Supabase response: $HTTP_STATUS"
+
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "✓ Supabase actif"
+          elif [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "404" ]; then
+            # 404 = endpoint vide mais Supabase est bien réveillé
+            echo "✓ Supabase actif (projet vide OK)"
+          else
+            echo "✗ Réponse inattendue : $HTTP_STATUS"
+            exit 1
+          fi
