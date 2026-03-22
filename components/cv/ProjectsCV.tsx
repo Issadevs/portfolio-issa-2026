@@ -58,7 +58,7 @@ export default function ProjectsCV({ t }: ProjectsCVProps) {
                 <span className="text-2xl">{meta.emoji}</span>
                 {meta.featured && (
                   <span className="text-xs px-2 py-0.5 bg-cv-accent text-white rounded-full font-medium">
-                    Featured
+                    {t("projects.featured_badge")}
                   </span>
                 )}
               </div>

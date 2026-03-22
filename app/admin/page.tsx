@@ -7,7 +7,10 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import LoginForm from "./LoginForm";
 import AdminForm from "./AdminForm";
 import type { PortfolioSettings } from "@/lib/settings";
-import { DEFAULT_SETTINGS } from "@/lib/settings";
+import { DEFAULT_SETTINGS, PORTFOLIO_SETTINGS_ID } from "@/lib/settings";
+import { hasSupabaseServerConfig } from "@/lib/env/server";
+import { IS_DEV } from "@/lib/env/shared";
+import { PROFILE } from "@/lib/profile";
 
 export const metadata: Metadata = {
   title: "Admin — Issa KANE",
@@ -17,14 +20,37 @@ export const metadata: Metadata = {
 // Forcer le rendu dynamique (auth via cookies)
 export const dynamic = "force-dynamic";
 
-const ALLOWED_EMAIL = "issa.kane@efrei.net";
+const ALLOWED_EMAIL = PROFILE.adminEmail;
 
 interface AdminPageProps {
-  searchParams: { error?: string };
+  searchParams?: Promise<{
+    error?: string | string[];
+  }>;
 }
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
-  const supabase = createServerSupabase();
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const errorParam = Array.isArray(resolvedSearchParams.error)
+    ? resolvedSearchParams.error[0]
+    : resolvedSearchParams.error;
+
+  if (!hasSupabaseServerConfig()) {
+    return (
+      <LoginForm
+        error={
+          errorParam === "auth_failed"
+            ? "Lien invalide ou expiré. Réessayez."
+            : errorParam === "supabase_unavailable"
+              ? "Supabase n'est pas configuré pour cet environnement."
+              : IS_DEV
+                ? "Supabase n'est pas configuré. Renseigne les variables NEXT_PUBLIC_SUPABASE_* en développement."
+                : "Espace admin indisponible sur cet environnement."
+        }
+      />
+    );
+  }
+
+  const supabase = await createServerSupabase();
 
   // Vérification de la session
   const {
@@ -36,7 +62,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     return (
       <LoginForm
         error={
-          searchParams.error === "auth_failed"
+          errorParam === "auth_failed"
             ? "Lien invalide ou expiré. Réessayez."
             : undefined
         }
@@ -69,6 +95,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     const { data, error } = await supabase
       .from("portfolio_settings")
       .select("*")
+      .eq("id", PORTFOLIO_SETTINGS_ID)
       .maybeSingle();
 
     if (error) {

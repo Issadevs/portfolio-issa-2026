@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getGitHubFeedConfig } from "@/lib/env/server";
+import { createRequestLogger } from "@/lib/monitoring";
 
 interface GitHubEvent {
   id: string;
@@ -54,8 +56,8 @@ function eventToFeedItem(event: GitHubEvent): FeedItem | null {
 }
 
 export async function GET() {
-  const username = process.env.GITHUB_USERNAME ?? "issadevs";
-  const token = process.env.GITHUB_TOKEN;
+  const { username, token } = getGitHubFeedConfig();
+  const log = createRequestLogger("github-feed");
 
   const headers: HeadersInit = {
     Accept: "application/vnd.github.v3+json",
@@ -75,9 +77,11 @@ export async function GET() {
 
     if (!res.ok) {
       const remaining = res.headers.get("x-ratelimit-remaining");
-      console.error(
-        `[github-feed] GitHub API ${res.status} — rate limit remaining: ${remaining ?? "?"}`
-      );
+      log.error("github_api_error", {
+        status: res.status,
+        remainingRateLimit: remaining ?? "?",
+        username,
+      });
       return NextResponse.json(
         { error: `GitHub API error: ${res.status}` },
         { status: res.status === 403 ? 429 : 502 }
@@ -90,12 +94,16 @@ export async function GET() {
       .filter((item): item is FeedItem => item !== null)
       .slice(0, 8);
 
+    log.info("github_feed_loaded", {
+      username,
+      itemCount: items.length,
+    });
     return NextResponse.json({ items });
   } catch (err) {
-    console.error(
-      "[github-feed] Fetch error:",
-      err instanceof Error ? err.message : "unknown"
-    );
+    log.error("github_feed_fetch_failed", {
+      username,
+      error: err,
+    });
     return NextResponse.json(
       { error: "Unable to fetch GitHub events" },
       { status: 502 }

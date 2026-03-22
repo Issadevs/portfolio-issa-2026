@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { getContactEmailConfig } from "@/lib/env/server";
+import { createRequestLogger } from "@/lib/monitoring";
+import { PROFILE } from "@/lib/profile";
 
 // In-memory rate limiting — resets on cold start, acceptable for a portfolio
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -7,8 +10,6 @@ const RATE_LIMIT = 3;
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1h
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 function getClientIp(req: NextRequest): string {
   return (
@@ -40,19 +41,27 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#039;");
 }
 
+function getEmailDomain(email: string): string {
+  return email.split("@")[1] ?? "unknown";
+}
+
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const log = createRequestLogger("contact");
+
   try {
     const body = (await req.json()) as Record<string, unknown>;
 
     // Honeypot — bots fill this hidden field, humans don't
     if (typeof body.website === "string" && body.website.length > 0) {
+      log.warn("honeypot_triggered", { ip });
       // Silently accept to not reveal the trap
       return NextResponse.json({ ok: true });
     }
 
     // Rate limiting
-    const ip = getClientIp(req);
     if (!checkRateLimit(ip)) {
+      log.warn("rate_limited", { ip });
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
         { status: 429 }
@@ -83,13 +92,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const toEmail = process.env.CONTACT_TO_EMAIL ?? "issa.kane@efrei.net";
-    const fromEmail =
-      process.env.CONTACT_FROM_EMAIL ?? "onboarding@resend.dev";
+    const contactConfig = getContactEmailConfig();
+
+    if (!contactConfig) {
+      log.error("service_unavailable", {
+        reason: "missing_resend_config",
+      });
+      return NextResponse.json(
+        { error: "Contact service is not configured yet. Please try again later." },
+        { status: 503 }
+      );
+    }
+
+    const resend = new Resend(contactConfig.apiKey);
 
     const { error } = await resend.emails.send({
-      from: `Portfolio Issa KANE <${fromEmail}>`,
-      to: [toEmail],
+      from: `Portfolio ${PROFILE.fullName} <${contactConfig.fromEmail}>`,
+      to: [contactConfig.toEmail],
       replyTo: email,
       subject: `Portfolio — Message de ${name}${company ? ` (${company})` : ""}`,
       html: `
@@ -127,20 +146,28 @@ export async function POST(req: NextRequest) {
     });
 
     if (error) {
-      console.error("[contact] Resend error:", error.name);
+      log.error("resend_send_failed", {
+        ip,
+        senderDomain: getEmailDomain(email),
+        error,
+      });
       return NextResponse.json(
         { error: "Failed to send message. Please try again." },
         { status: 500 }
       );
     }
 
-    console.info(`[contact] Message sent — from=${email} ip=${ip}`);
+    log.info("message_sent", {
+      ip,
+      senderDomain: getEmailDomain(email),
+      hasCompany: Boolean(company),
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error(
-      "[contact] Unexpected error:",
-      err instanceof Error ? err.message : "unknown"
-    );
+    log.error("unexpected_error", {
+      ip,
+      error: err,
+    });
     return NextResponse.json(
       { error: "An unexpected error occurred. Please try again." },
       { status: 500 }

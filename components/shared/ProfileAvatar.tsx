@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import { PROFILE } from "@/lib/profile";
 
 interface ProfileAvatarProps {
   size?: number;
@@ -39,10 +40,12 @@ export default function ProfileAvatar({
       >
         <Image
           src="/images/profile.jpg"
-          alt="Issa KANE"
+          alt={PROFILE.fullName}
           width={size}
           height={size}
           priority={priority}
+          loading={priority ? "eager" : undefined}
+          fetchPriority={priority ? "high" : undefined}
           className={`rounded-full object-cover transition-opacity hover:opacity-80 ${className ?? ""}`}
           onError={() => setError(true)}
         />
@@ -67,7 +70,7 @@ export default function ProfileAvatar({
             >
               <Image
                 src="/images/profile.jpg"
-                alt="Issa KANE"
+                alt={PROFILE.fullName}
                 width={400}
                 height={400}
                 className="rounded-2xl object-cover shadow-2xl"

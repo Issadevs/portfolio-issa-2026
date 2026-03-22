@@ -4,7 +4,7 @@
 // Le token GitHub reste côté serveur (GITHUB_TOKEN), jamais exposé au client
 // Cache 60s côté serveur — protège du rate limit GitHub en prod
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import type { Lang } from "@/hooks/useLang";
 
@@ -51,7 +51,7 @@ export default function GitHubFeed({ lang }: { lang: Lang }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  function fetchFeed() {
+  const fetchFeed = useCallback(() => {
     setLoading(true);
     setError(false);
     fetch("/api/github-feed")
@@ -62,12 +62,15 @@ export default function GitHubFeed({ lang }: { lang: Lang }) {
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }
+  }, []);
 
   useEffect(() => {
-    fetchFeed();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const kickoff = setTimeout(() => {
+      fetchFeed();
+    }, 0);
+
+    return () => clearTimeout(kickoff);
+  }, [fetchFeed]);
 
   return (
     <section className="py-20 px-4 relative z-10">

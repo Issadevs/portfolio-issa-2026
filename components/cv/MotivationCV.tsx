@@ -10,24 +10,9 @@ interface MotivationCVProps {
 }
 
 const motivations = [
-  {
-    key: "fitness",
-    icon: "💪",
-    stat: "26 mois",
-    statEn: "26 months",
-  },
-  {
-    key: "football",
-    icon: "⚽",
-    stat: "Depuis 7 ans",
-    statEn: "Since age 7",
-  },
-  {
-    key: "curiosity",
-    icon: "🧠",
-    stat: "C · GLSL · LangChain",
-    statEn: "C · GLSL · LangChain",
-  },
+  { key: "fitness", icon: "💪" },
+  { key: "football", icon: "⚽" },
+  { key: "curiosity", icon: "🧠" },
 ];
 
 export default function MotivationCV({ t }: MotivationCVProps) {

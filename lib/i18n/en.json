@@ -30,7 +30,7 @@
       "year": "2022",
       "title": "Commercial Prospector | Aérial Group",
       "role": "Commercial internship",
-      "text": "Startup building websites for businesses. Finding clients, understanding needs, and selling digital solutions. First pro experience, learned business before code."
+      "text": "Company specializing in electronic security. B2B teleprospecting: scheduling appointments for security solutions. First pro experience — learning business, discipline and communication."
     },
     "chapter2": {
       "year": "2023-2025",
@@ -45,6 +45,8 @@
   },
   "experience": {
     "title": "Experience",
+    "show_more": "More details ↓",
+    "show_less": "Less details ↑",
     "sfr_engineer": {
       "role": "Systems Engineer",
       "company": "SFR Paris",
@@ -72,6 +74,7 @@
   "projects": {
     "title": "Projects",
     "subtitle": "What I've built",
+    "featured_badge": "Featured",
     "petfinder": {
       "title": "PetFinder",
       "category": "Full-stack web application",

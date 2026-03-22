@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import type { Lang } from "@/hooks/useLang";
 import type { PortfolioSettings } from "@/lib/settings";
 import ProfileAvatar from "@/components/shared/ProfileAvatar";
-import { formatAvailableDate } from "@/lib/date";
+import { PROFILE, getAvailabilityLabel } from "@/lib/profile";
 
 interface HeroDevProps {
   t: (key: string) => string;
@@ -40,39 +40,6 @@ function useTypewriter(text: string, speed = 40) {
   return { displayed, done };
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function getStatusValue(
-  settings: PortfolioSettings,
-  lang: Lang,
-  t: (key: string) => string
-): string {
-  const contract = t(
-    `status.contract.${settings.contract_type.toLowerCase()}`
-  );
-
-  if (settings.status === "NOT_LOOKING") {
-    return `"${t("status.not_looking")}"`;
-  }
-
-  if (settings.status === "SOON") {
-    if (settings.available_from) {
-      const dateStr = formatAvailableDate(settings.available_from, lang, "short");
-      return lang === "fr"
-        ? `"${contract} dès ${dateStr}"`
-        : `"${contract} from ${dateStr}"`;
-    }
-    return lang === "fr"
-      ? `"${contract} — Bientôt disponible"`
-      : `"${contract} — Coming soon"`;
-  }
-
-  // OPEN
-  return lang === "fr"
-    ? `"${contract} — Disponible maintenant"`
-    : `"${contract} — Available now"`;
-}
-
 // ─── Composant ────────────────────────────────────────────────────────────────
 
 export default function HeroDev({
@@ -84,20 +51,19 @@ export default function HeroDev({
   const signature = t("hero.signature");
   const { displayed, done } = useTypewriter(signature, 35);
 
-  const statusValue = getStatusValue(settings, lang, t);
+  const statusValue = `"${getAvailabilityLabel(settings, lang)}"`;
 
   const lines = [
     {
       label: "const",
       key: "name",
-      value: '"Issa KANE"',
+      value: `"${PROFILE.fullName}"`,
       color: "text-yellow-300",
     },
     {
       label: "const",
       key: "role",
-      value:
-        lang === "fr" ? '"Ingénieur IA & Data"' : '"AI & Data Engineer"',
+      value: `"${PROFILE.role[lang]}"`,
       color: "text-green-300",
     },
     {

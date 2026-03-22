@@ -3,30 +3,11 @@
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { getSupabaseServerConfig } from "@/lib/env/server";
 
-function getServerSupabaseConfig(): { url: string; key: string } {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
-
-  if (!url || url.includes("xxxx") || !url.startsWith("https://")) {
-    throw new Error(
-      `[Supabase/server] NEXT_PUBLIC_SUPABASE_URL invalide : "${url.slice(0, 50)}"\n` +
-      `Vérifiez votre .env.local (ou les env vars Vercel en prod).`
-    );
-  }
-  if (!key || key.endsWith("...") || key.length < 100) {
-    throw new Error(
-      `[Supabase/server] NEXT_PUBLIC_SUPABASE_ANON_KEY invalide.\n` +
-      `Vérifiez votre .env.local (ou les env vars Vercel en prod).`
-    );
-  }
-
-  return { url, key };
-}
-
-export function createServerSupabase() {
-  const { url, key } = getServerSupabaseConfig();
-  const cookieStore = cookies();
+export async function createServerSupabase() {
+  const { url, key } = getSupabaseServerConfig();
+  const cookieStore = await cookies();
 
   return createServerClient(url, key, {
     cookies: {

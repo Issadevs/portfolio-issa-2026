@@ -16,6 +16,11 @@ interface ProjectEvaluation {
   protocol: { fr: string; en: string };
 }
 
+interface LocalizedLabel {
+  fr: string;
+  en: string;
+}
+
 const projects: {
   id: ProjectId;
   starred: boolean;
@@ -24,7 +29,7 @@ const projects: {
   snippet: { lang: string; code: string };
   architecture: { fr: string; en: string };
   challenges: { fr: string[]; en: string[] };
-  metrics: { label: string; value: string }[];
+  metrics: { label: LocalizedLabel; value: string }[];
   evaluation?: ProjectEvaluation;
 }[] = [
   {
@@ -49,9 +54,15 @@ const projects: {
       ],
     },
     metrics: [
-      { label: "Latence détection", value: "< 2s" },
-      { label: "Faux positifs réduits", value: "-40%" },
-      { label: "Uptime pipeline", value: "99.7%" },
+      {
+        label: { fr: "Latence détection", en: "Detection latency" },
+        value: "< 2s",
+      },
+      {
+        label: { fr: "Faux positifs réduits", en: "False positives reduced" },
+        value: "-40%",
+      },
+      { label: { fr: "Disponibilité pipeline", en: "Pipeline uptime" }, value: "99.7%" },
     ],
     evaluation: {
       dataset: {
@@ -111,9 +122,9 @@ def consume_and_detect(topic: str, model: IsolationForest, es: Elasticsearch):
       ],
     },
     metrics: [
-      { label: "Précision @10", value: "68%" },
-      { label: "NDCG@10", value: "0.74" },
-      { label: "Livres indexés", value: "50k+" },
+      { label: { fr: "Précision @10", en: "Precision @10" }, value: "68%" },
+      { label: { fr: "NDCG@10", en: "NDCG@10" }, value: "0.74" },
+      { label: { fr: "Livres indexés", en: "Indexed books" }, value: "50k+" },
     ],
     evaluation: {
       dataset: {
@@ -178,9 +189,9 @@ class HybridRecommender:
       ],
     },
     metrics: [
-      { label: "Temps réponse API", value: "< 80ms" },
-      { label: "Endpoints REST", value: "18" },
-      { label: "Coverage tests", value: "76%" },
+      { label: { fr: "Temps réponse API", en: "API response time" }, value: "< 80ms" },
+      { label: { fr: "Endpoints REST", en: "REST endpoints" }, value: "18" },
+      { label: { fr: "Couverture tests", en: "Test coverage" }, value: "76%" },
     ],
     evaluation: {
       dataset: {
@@ -238,9 +249,9 @@ class HybridRecommender:
       ],
     },
     metrics: [
-      { label: "Memory leaks", value: "0" },
-      { label: "Lignes de code", value: "~900" },
-      { label: "Dépendances", value: "0" },
+      { label: { fr: "Fuites mémoire", en: "Memory leaks" }, value: "0" },
+      { label: { fr: "Lignes de code", en: "Lines of code" }, value: "~900" },
+      { label: { fr: "Dépendances", en: "Dependencies" }, value: "0" },
     ],
     evaluation: {
       dataset: {
@@ -363,7 +374,7 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
 
             <div className="bg-dev-surface border border-dev-border rounded-xl p-5">
               <p className="text-dev-accent text-xs font-mono mb-2">
-                {"Architecture"}
+                {lang === "fr" ? "Architecture" : "Architecture"}
               </p>
               <p className="text-dev-muted text-sm font-mono leading-relaxed">
                 {project.architecture[lang]}
@@ -391,11 +402,15 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
                 </p>
                 <div className="space-y-2 text-xs">
                   <div>
-                    <span className="text-dev-muted font-mono">dataset: </span>
+                    <span className="text-dev-muted font-mono">
+                      {lang === "fr" ? "dataset : " : "dataset: "}
+                    </span>
                     <span className="text-dev-text">{project.evaluation.dataset[lang]}</span>
                   </div>
                   <div>
-                    <span className="text-dev-muted font-mono">protocol: </span>
+                    <span className="text-dev-muted font-mono">
+                      {lang === "fr" ? "protocole : " : "protocol: "}
+                    </span>
                     <span className="text-dev-text">{project.evaluation.protocol[lang]}</span>
                   </div>
                 </div>
@@ -405,13 +420,13 @@ export default function ProjectsDev({ t, lang }: ProjectsDevProps) {
             <div className="grid grid-cols-3 gap-3">
               {project.metrics.map((m) => (
                 <div
-                  key={m.label}
+                  key={`${project.id}-${m.label.en}`}
                   className="bg-dev-surface border border-dev-border rounded-lg p-3 text-center"
                 >
                   <p className="text-dev-accent font-mono font-bold text-lg">
                     {m.value}
                   </p>
-                  <p className="text-dev-muted text-xs mt-1">{m.label}</p>
+                  <p className="text-dev-muted text-xs mt-1">{m.label[lang]}</p>
                 </div>
               ))}
             </div>

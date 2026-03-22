@@ -15,13 +15,17 @@ export function useMode() {
   useEffect(() => {
     const stored = sessionStorage.getItem("portfolio_mode") as Mode | null;
     if (stored === "cv" || stored === "dev") {
-      setModeState(stored);
-      // Applique le dark class immédiatement sans animation
-      if (stored === "dev") {
-        document.documentElement.classList.add("dark");
-      }
+      const hydrateMode = setTimeout(() => {
+        setModeState(stored);
+      }, 0);
+
+      return () => clearTimeout(hydrateMode);
     }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", mode === "dev");
+  }, [mode]);
 
   const switchMode = useCallback(
     (newMode: Mode) => {
@@ -33,12 +37,6 @@ export function useMode() {
       setTimeout(() => {
         setModeState(newMode);
         sessionStorage.setItem("portfolio_mode", newMode);
-
-        if (newMode === "dev") {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
 
         setTimeout(() => setIsGlitching(false), 200);
       }, 600);

@@ -24,11 +24,43 @@ export default function WebGLBackground() {
     if (!container) return;
 
     // ─── Renderer ───────────────────────────────────────────────────────────
-    const renderer = new THREE.WebGLRenderer({
-      antialias: false,
+    const canvas = document.createElement("canvas");
+    const contextAttributes = {
       alpha: true,
-      powerPreference: "high-performance",
-    });
+      antialias: false,
+      powerPreference: "high-performance" as const,
+    };
+    const context: WebGL2RenderingContext | WebGLRenderingContext | null =
+      (canvas.getContext(
+        "webgl2",
+        contextAttributes
+      ) as WebGL2RenderingContext | null) ??
+      (canvas.getContext(
+        "webgl",
+        contextAttributes
+      ) as WebGLRenderingContext | null);
+
+    if (!context) {
+      console.warn("[webgl] WebGL indisponible, fond désactivé");
+      return;
+    }
+
+    let renderer: THREE.WebGLRenderer;
+
+    try {
+      renderer = new THREE.WebGLRenderer({
+        ...contextAttributes,
+        canvas,
+        context,
+      });
+    } catch (error) {
+      console.warn(
+        "[webgl] WebGL indisponible, fond désactivé",
+        error instanceof Error ? error.message : "unknown"
+      );
+      return;
+    }
+
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setClearColor(0x000000, 0);

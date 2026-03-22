@@ -4,6 +4,7 @@
 // Choix : position fixed avec blur backdrop pour lisibilité sur les deux backgrounds
 
 import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 import type { Mode } from "@/hooks/useMode";
 import type { Lang } from "@/hooks/useLang";
 
@@ -14,6 +15,8 @@ interface HeaderProps {
   onToggleMode: () => void;
   onToggleLang: () => void;
   isGlitching: boolean;
+  /** Préfixe de chemin pour les liens nav (ex: "/" depuis /cv) */
+  basePath?: string;
 }
 
 export default function Header({
@@ -23,8 +26,11 @@ export default function Header({
   onToggleMode,
   onToggleLang,
   isGlitching,
+  basePath,
 }: HeaderProps) {
   const isDev = mode === "dev";
+  const pathname = usePathname();
+  const isOnCvPage = pathname === "/cv";
 
   return (
     <motion.header
@@ -40,7 +46,7 @@ export default function Header({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         {/* Logo / identité */}
         <motion.a
-          href="#"
+          href={basePath ?? "#"}
           className={`font-mono text-sm font-semibold tracking-tight transition-colors ${
             isDev ? "text-dev-accent" : "text-cv-accent"
           }`}
@@ -63,12 +69,26 @@ export default function Header({
             {["parcours", "projets", "contact"].map((section) => (
               <a
                 key={section}
-                href={`#${section}`}
+                href={`${basePath ?? ""}#${section}`}
                 className="text-sm text-cv-muted hover:text-cv-text transition-colors"
               >
                 {t(`nav.${section}`)}
               </a>
             ))}
+            <a
+              href="/cv"
+              className={`text-sm transition-colors flex items-center gap-1.5 ${
+                isOnCvPage
+                  ? "text-cv-accent font-medium"
+                  : "text-cv-muted hover:text-cv-text"
+              }`}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              CV
+            </a>
           </nav>
         )}
 

@@ -4,14 +4,13 @@
 // Anti-spam : honeypot (champ website caché) + rate limit côté serveur
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { PortfolioSettings } from "@/lib/settings";
-import type { Lang } from "@/hooks/useLang";
+import { PROFILE } from "@/lib/profile";
 
 interface ContactCVProps {
   t: (key: string) => string;
   settings: PortfolioSettings;
-  lang: Lang;
 }
 
 type FormStatus = "idle" | "sending" | "sent" | "error";
@@ -19,6 +18,7 @@ type FormStatus = "idle" | "sending" | "sent" | "error";
 export default function ContactCV({ t, settings }: ContactCVProps) {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const messageFieldId = useId();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -97,34 +97,34 @@ export default function ContactCV({ t, settings }: ContactCVProps) {
             <InfoItem icon="📍" label={settings.location} />
             <InfoItem
               icon="✉️"
-              label="issa.kane@efrei.net"
-              href="mailto:issa.kane@efrei.net"
+              label={PROFILE.email}
+              href={`mailto:${PROFILE.email}`}
             />
             <InfoItem
               icon="📞"
-              label="06 52 52 72 14"
-              href="tel:+33652527214"
+              label={PROFILE.phoneLocal}
+              href={PROFILE.phoneHref}
             />
 
             {/* Liens sociaux */}
             <div className="flex gap-4 pt-2">
               <a
-                href="https://github.com/issadevs"
+                href={PROFILE.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 border border-cv-border rounded-lg text-sm text-cv-muted hover:text-cv-text hover:border-cv-accent/40 transition-colors"
               >
                 <GithubIcon />
-                @issadevs
+                {PROFILE.githubHandle}
               </a>
               <a
-                href="https://linkedin.com/in/issakane"
+                href={PROFILE.linkedInUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 border border-cv-border rounded-lg text-sm text-cv-muted hover:text-cv-text hover:border-cv-accent/40 transition-colors"
               >
                 <LinkedinIcon />
-                @issakane
+                {PROFILE.linkedInHandle}
               </a>
             </div>
           </motion.div>
@@ -178,10 +178,15 @@ export default function ContactCV({ t, settings }: ContactCVProps) {
               required
             />
             <div>
-              <label className="block text-cv-muted text-xs mb-1.5">
+              <label
+                htmlFor={messageFieldId}
+                className="block text-cv-muted text-xs mb-1.5"
+              >
                 {t("contact.form.message")}
               </label>
               <textarea
+                id={messageFieldId}
+                name="message"
                 value={formData.message}
                 onChange={(e) =>
                   setFormData({ ...formData, message: e.target.value })
@@ -261,10 +266,16 @@ function InputField({
   onChange: (v: string) => void;
   required?: boolean;
 }) {
+  const inputId = useId();
+
   return (
     <div>
-      <label className="block text-cv-muted text-xs mb-1.5">{label}</label>
+      <label htmlFor={inputId} className="block text-cv-muted text-xs mb-1.5">
+        {label}
+      </label>
       <input
+        id={inputId}
+        name={label}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}

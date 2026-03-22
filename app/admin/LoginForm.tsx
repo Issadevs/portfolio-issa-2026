@@ -4,13 +4,15 @@
 
 import { useState } from "react";
 import { createBrowserSupabase, getSupabaseEnvStatus } from "@/lib/supabase/browser";
+import { IS_DEV } from "@/lib/env/shared";
+import { PROFILE } from "@/lib/profile";
 
 interface LoginFormProps {
   error?: string;
 }
 
-const ADMIN_EMAIL = "issa.kane@efrei.net";
-const IS_DEV = process.env.NODE_ENV === "development";
+const ADMIN_EMAIL = PROFILE.adminEmail;
+const ADMIN_REDIRECT_PATH = "/auth/callback?next=/admin";
 
 export default function LoginForm({ error }: LoginFormProps) {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
@@ -19,8 +21,8 @@ export default function LoginForm({ error }: LoginFormProps) {
   const [errorMsg, setErrorMsg] = useState(error ?? "");
 
   // Évalué une seule fois au rendu (client-side, NEXT_PUBLIC vars disponibles)
-  const envStatus = IS_DEV ? getSupabaseEnvStatus() : null;
-  const configOk = !IS_DEV || (envStatus?.urlOk && envStatus?.keyOk);
+  const envStatus = getSupabaseEnvStatus();
+  const configOk = envStatus.urlOk && envStatus.keyOk;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +35,7 @@ export default function LoginForm({ error }: LoginFormProps) {
       const { error: sbError } = await supabase.auth.signInWithOtp({
         email: ADMIN_EMAIL,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/admin`,
+          emailRedirectTo: `${window.location.origin}${ADMIN_REDIRECT_PATH}`,
           // shouldCreateUser: true — crée l'utilisateur s'il n'existe pas encore
           // La protection est assurée côté serveur (vérification email dans actions.ts)
           shouldCreateUser: true,
@@ -107,6 +109,12 @@ export default function LoginForm({ error }: LoginFormProps) {
             </pre>
           )}
 
+          {!configOk && !IS_DEV && !errorMsg && (
+            <p className="text-yellow-300 text-xs font-mono bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-2">
+              Configuration Supabase absente sur cet environnement. Connexion admin désactivée.
+            </p>
+          )}
+
           {/* Feedback succès */}
           {status === "sent" ? (
             <div className="bg-[#00FF88]/10 border border-[#00FF88]/20 rounded-lg px-4 py-4 text-center">
@@ -120,7 +128,7 @@ export default function LoginForm({ error }: LoginFormProps) {
           ) : (
             <button
               type="submit"
-              disabled={status === "sending" || (!configOk && IS_DEV)}
+              disabled={status === "sending" || !configOk}
               className="w-full py-3 bg-[#00FF88] text-black rounded-lg text-sm font-mono font-bold hover:bg-[#00e07a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {status === "sending"
@@ -163,11 +171,7 @@ export default function LoginForm({ error }: LoginFormProps) {
             <div className="mt-3 pt-3 border-t border-yellow-500/10">
               <p className="text-gray-500 text-xs font-mono">
                 redirectTo:{" "}
-                <span className="text-gray-300">
-                  {typeof window !== "undefined"
-                    ? `${window.location.origin}/auth/callback?next=/admin`
-                    : "..."}
-                </span>
+                <span className="text-gray-300">{ADMIN_REDIRECT_PATH}</span>
               </p>
             </div>
           </div>

@@ -31,9 +31,17 @@ export function useLang() {
   useEffect(() => {
     const stored = localStorage.getItem("portfolio_lang") as Lang | null;
     if (stored && (stored === "fr" || stored === "en")) {
-      setLangState(stored);
+      const hydrateLang = setTimeout(() => {
+        setLangState(stored);
+      }, 0);
+
+      return () => clearTimeout(hydrateLang);
     }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const setLang = useCallback((newLang: Lang) => {
     if (newLang === lang) return;

@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import type { Lang } from "@/hooks/useLang";
 
 interface PerfData {
   fps: number;
@@ -28,7 +29,7 @@ function colorFPS(fps: number): string {
   return "text-red-400";
 }
 
-export default function PerfBadge() {
+export default function PerfBadge({ lang }: { lang: Lang }) {
   const [perf, setPerf] = useState<PerfData>({
     fps: 60,
     memory: null,
@@ -38,11 +39,13 @@ export default function PerfBadge() {
   });
   const [isExpanded, setIsExpanded] = useState(false);
   const frameCount = useRef(0);
-  const lastTime = useRef(performance.now());
+  const lastTime = useRef(0);
   const rafId = useRef<number>(0);
 
   // FPS loop — requestAnimationFrame
   useEffect(() => {
+    lastTime.current = performance.now();
+
     const updateFPS = () => {
       frameCount.current++;
       const now = performance.now();
@@ -76,10 +79,12 @@ export default function PerfBadge() {
   useEffect(() => {
     // TTFB via Navigation Timing API
     const navEntries = performance.getEntriesByType("navigation");
-    if (navEntries.length > 0) {
-      const nav = navEntries[0] as PerformanceNavigationTiming;
-      setPerf((prev) => ({ ...prev, ttfb: Math.round(nav.responseStart) }));
-    }
+    const navTimeout = setTimeout(() => {
+      if (navEntries.length > 0) {
+        const nav = navEntries[0] as PerformanceNavigationTiming;
+        setPerf((prev) => ({ ...prev, ttfb: Math.round(nav.responseStart) }));
+      }
+    }, 0);
 
     // FCP via PerformanceObserver (paint entries)
     let fcpObserver: PerformanceObserver | null = null;
@@ -112,6 +117,7 @@ export default function PerfBadge() {
     }
 
     return () => {
+      clearTimeout(navTimeout);
       fcpObserver?.disconnect();
       lcpObserver?.disconnect();
     };
@@ -129,7 +135,7 @@ export default function PerfBadge() {
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center gap-2 px-3 py-2 bg-dev-surface border border-dev-border rounded-lg font-mono text-xs hover:border-dev-accent/40 transition-colors"
-        title="Performance monitor"
+        title={lang === "fr" ? "Moniteur de performance" : "Performance monitor"}
       >
         <span className={fpsColor}>{perf.fps}</span>
         <span className="text-dev-muted">fps</span>
@@ -150,7 +156,7 @@ export default function PerfBadge() {
           className="absolute bottom-full right-0 mb-2 w-52 bg-dev-surface border border-dev-border rounded-lg p-3 font-mono text-xs"
         >
           <p className="text-dev-muted mb-2 uppercase tracking-widest text-[10px]">
-            Live Performance
+            {lang === "fr" ? "Performance temps réel" : "Live Performance"}
           </p>
 
           <div className="space-y-1.5">

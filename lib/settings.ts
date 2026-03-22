@@ -2,6 +2,7 @@
 // Les composants client doivent utiliser `import type { PortfolioSettings }`
 
 import { unstable_cache } from "next/cache";
+import { getSupabaseServerConfig, hasSupabaseServerConfig } from "@/lib/env/server";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,21 +37,22 @@ export const DEFAULT_SETTINGS: PortfolioSettings = {
   updated_at: new Date().toISOString(),
 };
 
+export const PORTFOLIO_SETTINGS_ID = DEFAULT_SETTINGS.id;
+
 // ─── Fetch public (pas de cookies, cacheable en ISR) ─────────────────────────
 
 export const getPortfolioSettings = unstable_cache(
   async (): Promise<PortfolioSettings> => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !anonKey) {
+    if (!hasSupabaseServerConfig()) {
       console.warn("[settings] SUPABASE env vars manquantes — fallback defaults");
       return DEFAULT_SETTINGS;
     }
 
+    const { url: supabaseUrl, key: anonKey } = getSupabaseServerConfig();
+
     try {
       const res = await fetch(
-        `${supabaseUrl}/rest/v1/portfolio_settings?select=*&limit=1`,
+        `${supabaseUrl}/rest/v1/portfolio_settings?id=eq.${PORTFOLIO_SETTINGS_ID}&select=*`,
         {
           headers: {
             apikey: anonKey,

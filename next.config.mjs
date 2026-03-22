@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  poweredByHeader: false,
+  allowedDevOrigins: ["localhost", "127.0.0.1"],
   // Headers pour optimiser les performances et la sécurité
   async headers() {
     return [
@@ -13,19 +15,10 @@ const nextConfig = {
       },
     ];
   },
-  // Images GitHub pour le feed d'activité
+  // Aucune image distante n'est nécessaire ici, on coupe donc l'optimizer
+  // pour réduire la surface d'attaque et éviter le cache disque next/image.
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-      },
-    ],
-  },
-  // Webpack : nécessaire pour Three.js (module ES)
-  webpack: (config) => {
-    config.externals = config.externals || [];
-    return config;
+    unoptimized: true,
   },
 };
 

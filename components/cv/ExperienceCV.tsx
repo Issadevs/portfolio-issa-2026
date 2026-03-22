@@ -84,7 +84,7 @@ export default function ExperienceCV({ t }: ExperienceCVProps) {
             onClick={() => setExpandedSfr(!expandedSfr)}
             className="text-sm text-cv-accent hover:underline flex items-center gap-1"
           >
-            {expandedSfr ? "Moins de détails ↑" : "Plus de détails ↓"}
+            {expandedSfr ? t("experience.show_less") : t("experience.show_more")}
           </button>
 
           <motion.div

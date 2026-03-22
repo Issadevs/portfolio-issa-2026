@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMode } from "@/hooks/useMode";
 import { useLang } from "@/hooks/useLang";
@@ -58,13 +58,21 @@ function GitHubFeedSkeleton() {
 
 function usePrefersReducedMotion() {
   const [prefers, setPrefers] = useState(false);
+
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefers(mq.matches);
+    const syncInitialPreference = setTimeout(() => {
+      setPrefers(mq.matches);
+    }, 0);
     const handler = (e: MediaQueryListEvent) => setPrefers(e.matches);
     mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
+
+    return () => {
+      clearTimeout(syncInitialPreference);
+      mq.removeEventListener("change", handler);
+    };
   }, []);
+
   return prefers;
 }
 
@@ -77,25 +85,26 @@ export default function PortfolioClient({ settings }: PortfolioClientProps) {
   const { lang, toggleLang, t, isTransitioning } = useLang();
   const terminal = useTerminal(lang, settings);
   const prefersReducedMotion = usePrefersReducedMotion();
-  const [idleReady, setIdleReady] = useState(false);
+  const [devEnhancementsReady, setDevEnhancementsReady] = useState(false);
 
   const isDev = mode === "dev";
+  const idleReady = isDev && devEnhancementsReady;
 
   useEffect(() => {
-    if (!isDev) {
-      setIdleReady(false);
+    if (!isDev || devEnhancementsReady) {
       return;
     }
+
     if ("requestIdleCallback" in window) {
-      const id = requestIdleCallback(() => setIdleReady(true), {
+      const id = requestIdleCallback(() => setDevEnhancementsReady(true), {
         timeout: 2000,
       });
       return () => cancelIdleCallback(id);
     } else {
-      const id = setTimeout(() => setIdleReady(true), 2000);
+      const id = setTimeout(() => setDevEnhancementsReady(true), 2000);
       return () => clearTimeout(id);
     }
-  }, [isDev]);
+  }, [devEnhancementsReady, isDev]);
 
   return (
     <>
@@ -139,7 +148,7 @@ export default function PortfolioClient({ settings }: PortfolioClientProps) {
               <ExperienceCV t={t} />
               <ProjectsCV t={t} />
               <MotivationCV t={t} />
-              <ContactCV t={t} lang={lang} settings={settings} />
+              <ContactCV t={t} settings={settings} />
 
               <footer className="py-8 px-4 border-t border-cv-border">
                 <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-cv-muted text-xs">
@@ -184,7 +193,7 @@ export default function PortfolioClient({ settings }: PortfolioClientProps) {
 
               <Terminal {...terminal} t={t} />
 
-              {idleReady && <PerfBadge />}
+              {idleReady && <PerfBadge lang={lang} />}
             </motion.div>
           )}
         </AnimatePresence>

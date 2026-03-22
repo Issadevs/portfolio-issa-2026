@@ -22,6 +22,9 @@ export default function BrandLogo({
   const [error, setError] = useState(false);
   const config = brands[brand];
   const src = dark && config.darkLogoSrc ? config.darkLogoSrc : config.logoSrc;
+  const computedWidth = Math.round(
+    (config.dimensions.width / config.dimensions.height) * size
+  );
 
   const logo = error ? (
     <span
@@ -34,7 +37,7 @@ export default function BrandLogo({
     <Image
       src={src}
       alt={config.name}
-      width={size}
+      width={computedWidth}
       height={size}
       className="object-contain flex-shrink-0"
       onError={() => setError(true)}

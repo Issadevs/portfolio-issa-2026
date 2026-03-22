@@ -7,7 +7,7 @@ import { motion, type Variants } from "framer-motion";
 import type { Lang } from "@/hooks/useLang";
 import type { PortfolioSettings } from "@/lib/settings";
 import ProfileAvatar from "@/components/shared/ProfileAvatar";
-import { formatAvailableDate } from "@/lib/date";
+import { PROFILE, getAvailabilityLabel } from "@/lib/profile";
 
 interface HeroCVProps {
   t: (key: string) => string;
@@ -29,39 +29,6 @@ const itemVariants: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
-// ─── Helpers badge ────────────────────────────────────────────────────────────
-
-function getBadgeText(
-  settings: PortfolioSettings,
-  lang: Lang,
-  t: (key: string) => string
-): string {
-  const contract = t(
-    `status.contract.${settings.contract_type.toLowerCase()}`
-  );
-
-  if (settings.status === "NOT_LOOKING") {
-    return t("status.not_looking");
-  }
-
-  if (settings.status === "SOON") {
-    if (settings.available_from) {
-      const dateStr = formatAvailableDate(settings.available_from, lang);
-      return lang === "fr"
-        ? `${contract} dès ${dateStr}`
-        : `${contract} from ${dateStr}`;
-    }
-    return lang === "fr"
-      ? `${contract} — Bientôt disponible`
-      : `${contract} — Coming soon`;
-  }
-
-  // OPEN
-  return lang === "fr"
-    ? `${contract} — Disponible maintenant`
-    : `${contract} — Available now`;
-}
-
 function getBadgeDotClass(status: PortfolioSettings["status"]): string {
   if (status === "OPEN") return "bg-green-500 animate-pulse";
   if (status === "SOON") return "bg-yellow-500 animate-pulse";
@@ -76,7 +43,7 @@ export default function HeroCV({
   onSwitchToDev,
   settings,
 }: HeroCVProps) {
-  const badgeText = getBadgeText(settings, lang, t);
+  const badgeText = getAvailabilityLabel(settings, lang);
   const dotClass = getBadgeDotClass(settings.status);
 
   return (
@@ -113,7 +80,7 @@ export default function HeroCV({
             {t("hero.greeting")}
           </p>
           <h1 className="text-5xl sm:text-7xl font-bold text-cv-text tracking-tight leading-none mb-6">
-            Issa <span className="text-cv-accent">KANE</span>
+            {PROFILE.firstName} <span className="text-cv-accent">{PROFILE.lastName}</span>
           </h1>
         </motion.div>
 
@@ -153,6 +120,26 @@ export default function HeroCV({
               {t("hero.cta_contact")}
             </a>
           )}
+
+          <a
+            href="/cv"
+            className="px-8 py-3 border border-cv-border text-cv-text rounded-lg font-medium text-sm hover:border-cv-accent hover:text-cv-accent transition-colors w-full sm:w-auto text-center flex items-center justify-center gap-2"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="flex-shrink-0"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            {lang === "fr" ? "Voir le CV" : "View CV"}
+          </a>
 
           <button
             onClick={onSwitchToDev}

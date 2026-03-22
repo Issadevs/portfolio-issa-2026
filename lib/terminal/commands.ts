@@ -1,5 +1,6 @@
 import type { Lang } from "@/hooks/useLang";
 import type { PortfolioSettings } from "@/lib/settings";
+import { PROFILE } from "@/lib/profile";
 
 export type CommandHandler = (lang: Lang, settings: PortfolioSettings) => string | string[];
 type Commands = Record<string, CommandHandler>;
@@ -57,8 +58,8 @@ export const terminalCommands: Commands = {
         : padBox(settings.headline_fr || "Disponible");
       const lines: string[] = [
         "┌─────────────────────────────────────────┐",
-        "│  Issa KANE                              │",
-        "│  Ingénieur IA & Data                    │",
+        `│  ${PROFILE.fullName.padEnd(39)}│`,
+        `│  ${PROFILE.role.fr.padEnd(39)}│`,
         "│  EFREI Paris | Master 1                 │",
         padBox(`${getAge()} ans | ${settings.location}`),
         availLine,
@@ -79,8 +80,8 @@ export const terminalCommands: Commands = {
         : padBox(settings.headline_en || "Available");
       const lines: string[] = [
         "┌─────────────────────────────────────────┐",
-        "│  Issa KANE                              │",
-        "│  AI & Data Engineer                     │",
+        `│  ${PROFILE.fullName.padEnd(39)}│`,
+        `│  ${PROFILE.role.en.padEnd(39)}│`,
         "│  EFREI Paris | Master 1                 │",
         padBox(`${getAge()} years old | ${settings.location}`),
         availLine,
@@ -173,7 +174,7 @@ export const terminalCommands: Commands = {
           "",
           "  CE PORTFOLIO",
           "  Next.js 14 · TypeScript · Tailwind · Framer Motion",
-          "  Three.js · GLSL · Shiki · Monaco Editor",
+          "  Three.js · GLSL · custom code highlight",
         ]
       : [
           "── TECH STACK ───────────────────────────────",
@@ -203,7 +204,7 @@ export const terminalCommands: Commands = {
           "",
           "  THIS PORTFOLIO",
           "  Next.js 14 · TypeScript · Tailwind · Framer Motion",
-          "  Three.js · GLSL · Shiki · Monaco Editor",
+          "  Three.js · GLSL · custom code highlight",
         ],
 
   xp: (lang, _settings) =>
@@ -255,10 +256,10 @@ export const terminalCommands: Commands = {
       const lines: string[] = [
         "── CONTACT ──────────────────────────────────",
         "",
-        "  Email    →  issa.kane@efrei.net",
-        "  GitHub   →  github.com/issadevs",
-        "  LinkedIn →  linkedin.com/in/issakane",
-        "  Tél      →  06 52 52 72 14",
+        `  Email    →  ${PROFILE.email}`,
+        `  GitHub   →  ${PROFILE.githubPath}`,
+        `  LinkedIn →  ${PROFILE.linkedInPath}`,
+        `  Tél      →  ${PROFILE.phoneLocal}`,
         "",
       ];
       if (!notLooking) lines.push(`  ${settings.headline_fr || "Disponible"}`);
@@ -269,10 +270,10 @@ export const terminalCommands: Commands = {
       const lines: string[] = [
         "── CONTACT ──────────────────────────────────",
         "",
-        "  Email    →  issa.kane@efrei.net",
-        "  GitHub   →  github.com/issadevs",
-        "  LinkedIn →  linkedin.com/in/issakane",
-        "  Phone    →  +33 6 52 52 72 14",
+        `  Email    →  ${PROFILE.email}`,
+        `  GitHub   →  ${PROFILE.githubPath}`,
+        `  LinkedIn →  ${PROFILE.linkedInPath}`,
+        `  Phone    →  ${PROFILE.phoneIntl}`,
         "",
       ];
       if (!notLooking) lines.push(`  ${settings.headline_en || "Available"}`);

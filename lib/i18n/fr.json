@@ -30,7 +30,7 @@
       "year": "2022",
       "title": "Prospecteur commercial | Aérial Group",
       "role": "Stage commercial",
-      "text": "Startup qui crée des sites web pour les entreprises. Trouver des clients, comprendre leurs besoins et vendre des solutions digitales. Première expérience pro, apprendre le business avant le code."
+      "text": "Société spécialisée en sécurité électronique. Téléprospection B2B : prise de rendez-vous pour des solutions de sécurité. Première expérience pro — apprendre le business, la rigueur et la communication."
     },
     "chapter2": {
       "year": "2023-2025",
@@ -74,6 +74,7 @@
   "projects": {
     "title": "Projets",
     "subtitle": "Ce que j'ai construit",
+    "featured_badge": "À la une",
     "petfinder": {
       "title": "PetFinder",
       "category": "Application web full-stack",

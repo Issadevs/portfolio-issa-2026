@@ -6,9 +6,16 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { createServerSupabase } from "@/lib/supabase/server";
-import type { StatusType, ContractType } from "@/lib/settings";
+import {
+  DEFAULT_SETTINGS,
+  type StatusType,
+  type ContractType,
+} from "@/lib/settings";
+import { hasSupabaseServerConfig } from "@/lib/env/server";
+import { IS_DEV } from "@/lib/env/shared";
+import { PROFILE } from "@/lib/profile";
 
-const ALLOWED_EMAIL = "issa.kane@efrei.net";
+const ALLOWED_EMAIL = PROFILE.adminEmail;
 
 // Rate limit in-memory (reset sur cold start — suffisant pour un seul admin)
 const updateRateLimit = new Map<string, { count: number; resetAt: number }>();
@@ -30,7 +37,15 @@ function checkRateLimit(userId: string): boolean {
 type ActionResult = { ok: true } | { error: string };
 
 export async function updateSettings(formData: FormData): Promise<ActionResult> {
-  const supabase = createServerSupabase();
+  if (!hasSupabaseServerConfig()) {
+    return {
+      error: IS_DEV
+        ? "Supabase n'est pas configuré pour cet environnement de développement."
+        : "Configuration serveur indisponible.",
+    };
+  }
+
+  const supabase = await createServerSupabase();
 
   // 1. Vérification auth
   const {
@@ -95,57 +110,44 @@ export async function updateSettings(formData: FormData): Promise<ActionResult> 
     updated_at: new Date().toISOString(),
   };
 
-  // 4. Vérifier si une ligne existe déjà
-  // maybeSingle() : retourne null (pas d'erreur) si aucune ligne — contrairement à single()
-  const { data: existing, error: fetchError } = await supabase
+  // 4. Upsert singleton : une seule ligne, id fixe = "default"
+  const { error: upsertError } = await supabase
     .from("portfolio_settings")
-    .select("id")
-    .maybeSingle();
+    .upsert(
+      {
+        id: DEFAULT_SETTINGS.id,
+        ...payload,
+      },
+      { onConflict: "id" }
+    );
 
-  if (fetchError) {
-    console.error("[admin/actions] Erreur lecture:", fetchError.message);
-    return { error: `Erreur de lecture DB : ${fetchError.message}` };
+  if (upsertError) {
+    console.error("[admin/actions] Upsert error:", upsertError.message);
+    const hint = upsertError.message.includes("row-level security")
+      ? " → Vérifiez les policies RLS Supabase versionnées dans supabase/migrations."
+      : "";
+    return { error: `Échec de la sauvegarde : ${upsertError.message}${hint}` };
   }
 
-  // 5. INSERT si table vide, UPDATE si ligne existe
-  if (existing) {
-    const { error: updateError } = await supabase
-      .from("portfolio_settings")
-      .update(payload)
-      .eq("id", existing.id);
-
-    if (updateError) {
-      console.error("[admin/actions] Update error:", updateError.message);
-      return { error: `Échec de la mise à jour : ${updateError.message}` };
-    }
-  } else {
-    // Première utilisation : crée la ligne (seed automatique)
-    const { error: insertError } = await supabase
-      .from("portfolio_settings")
-      .insert(payload);
-
-    if (insertError) {
-      console.error("[admin/actions] Insert error:", insertError.message);
-      // Message actionnable si c'est un problème de RLS
-      const hint = insertError.message.includes("row-level security")
-        ? " → Vérifiez la policy INSERT dans Supabase (voir SQL fourni)."
-        : "";
-      return { error: `Échec de la création : ${insertError.message}${hint}` };
-    }
-  }
-
-  // 6. Invalidation du cache Next.js (homepage + data cache)
+  // 5. Invalidation du cache Next.js (homepage + data cache)
   revalidatePath("/");
-  revalidateTag("portfolio-settings");
+  revalidatePath("/cv");
+  revalidateTag("portfolio-settings", "max");
 
-  console.info(
-    `[admin/actions] Settings ${existing ? "mis à jour" : "créés"} par ${user.email}`
-  );
+  console.info(`[admin/actions] Settings sauvegardés par ${user.email}`);
   return { ok: true };
 }
 
 export async function signOut(): Promise<ActionResult> {
-  const supabase = createServerSupabase();
+  if (!hasSupabaseServerConfig()) {
+    return {
+      error: IS_DEV
+        ? "Supabase n'est pas configuré pour cet environnement de développement."
+        : "Configuration serveur indisponible.",
+    };
+  }
+
+  const supabase = await createServerSupabase();
   const { error } = await supabase.auth.signOut();
   if (error) return { error: error.message };
   revalidatePath("/admin");
