@@ -1,0 +1,31 @@
+name: Semgrep — Static Analysis
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  semgrep:
+    name: Scan code security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/react
+            p/typescript
+            p/nextjs
+            p/owasp-top-ten
+            p/security-audit
+            .semgrep/rules.yml
+        env:
+          # Optionnel : connecte-toi sur semgrep.dev pour voir les résultats en dashboard
+          # SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+          SEMGREP_SEND_METRICS: "off"

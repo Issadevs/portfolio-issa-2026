@@ -1,0 +1,65 @@
+# Socket.dev — Supply Chain Security
+# Docs: https://docs.socket.dev/docs/socket-yml
+# Installation : https://github.com/apps/socket-security (GitHub App gratuite)
+
+version: 2
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Sévérités par type de risque
+# action: error  → bloque la PR
+# action: warn   → commentaire d'avertissement
+# action: ignore → silencieux
+# ─────────────────────────────────────────────────────────────────────────────
+
+issues:
+
+  # Malveillance avérée — toujours bloquer
+  malware:
+    action: error
+
+  # CVE dans les dépendances
+  criticalCVEs:
+    action: error
+  highCVEs:
+    action: error
+  moderateCVEs:
+    action: warn
+  mildCVEs:
+    action: ignore
+
+  # Scripts d'installation suspects (postinstall, preinstall)
+  # Risque élevé pour les portfolios : un package malveillant peut exfiltrer des secrets CI
+  installScripts:
+    action: warn
+
+  # Code obfusqué dans un package npm — red flag majeur
+  obfuscatedCode:
+    action: error
+
+  # Package qui accède au système de fichiers de façon inattendue
+  filesystemAccess:
+    action: warn
+
+  # Package qui fait des appels réseau inattendus
+  networkAccess:
+    action: warn
+
+  # Package sans auteur ou maintenu par un seul compte sans historique
+  missingAuthor:
+    action: warn
+
+  # Typosquatting — package dont le nom ressemble à un package populaire
+  typosquat:
+    action: error
+
+  # Dépendance retirée de npm (unpublished)
+  unpublished:
+    action: error
+
+  # Mise à jour de mainteneur récente et suspecte (takeover)
+  newAuthor:
+    action: warn
+
+  # Dépendance abandonnée (pas de mise à jour depuis longtemps)
+  unmaintained:
+    action: ignore

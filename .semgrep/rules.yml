@@ -1,0 +1,106 @@
+rules:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # XSS — dangerouslySetInnerHTML
+  # Utilise pattern-regex car la syntaxe JSX attribute ne supporte pas
+  # le pattern AST standard dans cette version de Semgrep.
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: dangerous-inner-html-dynamic
+    message: >
+      dangerouslySetInnerHTML avec une variable dynamique.
+      Assurez-vous que le contenu est sanitise (ex: DOMPurify).
+      Si c'est intentionnel, ajoutez un commentaire nosemgrep.
+    languages: [generic]
+    severity: WARNING
+    pattern-regex: 'dangerouslySetInnerHTML=\{\{[^}]*__html:\s*\w'
+    paths:
+      include:
+        - "**/components/**"
+        - "**/app/**"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Next.js — process.env direct dans les composants client
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: process-env-direct-in-component
+    message: >
+      Acces direct a process.env dans un composant client.
+      Utilisez les helpers types de @/lib/env/shared ou @/lib/env/server
+      pour eviter d'exposer accidentellement des secrets cote client.
+    languages: [typescript, javascript]
+    severity: WARNING
+    patterns:
+      - pattern: process.env.$KEY
+      - pattern-not: process.env.NEXT_PUBLIC_$KEY
+      - pattern-not: process.env.NODE_ENV
+    paths:
+      include:
+        - "**/components/**"
+        - "**/hooks/**"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Next.js — NEXT_PUBLIC_ dans du code serveur (routes API, actions)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: next-public-var-in-server-code
+    message: >
+      Variable NEXT_PUBLIC_* dans du code serveur.
+      Ces variables sont exposees dans le bundle client.
+      Verifiez qu'elles ne contiennent pas de secret.
+    languages: [typescript]
+    severity: INFO
+    pattern: process.env.NEXT_PUBLIC_$KEY
+    paths:
+      include:
+        - "**/app/api/**"
+        - "**/app/admin/**"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # API Routes — console.log (doit utiliser createRequestLogger)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: console-log-in-api-route
+    message: >
+      console.log() dans une route API peut fuiter des donnees de requete.
+      Utilisez createRequestLogger() de @/lib/monitoring a la place.
+    languages: [typescript]
+    severity: WARNING
+    pattern: console.log(...)
+    paths:
+      include:
+        - "**/app/api/**"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # API Routes — Exposition des messages d'erreur internes
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: api-exposes-internal-error
+    message: >
+      Ne pas exposer err.message directement dans une reponse API.
+      Loggez le detail cote serveur et renvoyez un message generique au client.
+    languages: [typescript]
+    severity: WARNING
+    patterns:
+      - pattern: "NextResponse.json({ error: $ERR.message }, ...)"
+    paths:
+      include:
+        - "**/app/api/**"
+        - "**/app/admin/**"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Server Actions — Ecriture DB sans verification auth apparente
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  - id: server-action-upsert-without-auth-comment
+    message: >
+      Appel .upsert() dans une Server Action.
+      Assurez-vous que supabase.auth.getUser() est appele et valide avant
+      toute modification de la base de donnees.
+    languages: [typescript]
+    severity: INFO
+    pattern: $SUPABASE.from(...).upsert(...)
+    paths:
+      include:
+        - "**/app/admin/**"
+        - "**/app/**/actions.ts"

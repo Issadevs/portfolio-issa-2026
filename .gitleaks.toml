@@ -1,0 +1,31 @@
+# Gitleaks configuration
+# Docs: https://github.com/gitleaks/gitleaks#configuration
+
+title = "Portfolio Issa KANE — Gitleaks config"
+
+[extend]
+# Utilise les règles par défaut de gitleaks
+useDefault = true
+
+# Fichiers et dossiers à ignorer
+[allowlist]
+description = "Global allowlist"
+paths = [
+  # Dépendances — trop de bruit, jamais commitées
+  '''node_modules''',
+  # Rapports de build
+  '''.next''',
+  # Lock files (peuvent contenir des hashes qui déclenchent des faux positifs)
+  '''package-lock\.json''',
+  '''yarn\.lock''',
+]
+
+# Patterns autorisés (faux positifs connus dans un projet Next.js)
+regexes = [
+  # Variables d'env publiques Next.js — intentionnellement exposées côté client
+  '''NEXT_PUBLIC_[A-Z_]+=["']?[^"'\s]+["']?''',
+  # Hashes de commit git dans les changelogs / commentaires
+  '''[0-9a-f]{40}''',
+  # Placeholder d'exemple dans la config CI
+  '''https://example\.com''',
+]

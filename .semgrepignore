@@ -1,0 +1,25 @@
+# Dépendances
+node_modules/
+
+# Build
+.next/
+out/
+build/
+
+# Tests (règles moins strictes acceptables)
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+playwright-report/
+test-results/
+
+# Config générée
+next-env.d.ts
+*.tsbuildinfo
+
+# Fichiers de config non-applicatifs
+*.config.js
+*.config.ts
+tailwind.config.ts
+postcss.config.js
