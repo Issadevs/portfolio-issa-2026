@@ -111,7 +111,6 @@ export async function updateSettings(formData: FormData): Promise<ActionResult> 
   };
 
   // 4. Upsert singleton : une seule ligne, id fixe = "default"
-  // nosemgrep: server-action-upsert-without-auth-comment — auth vérifié lignes 52-56
   const { error: upsertError } = await supabase
     .from("portfolio_settings")
     .upsert(

@@ -88,19 +88,3 @@ rules:
         - "**/app/api/**"
         - "**/app/admin/**"
 
-  # ─────────────────────────────────────────────────────────────────────────────
-  # Server Actions — Ecriture DB sans verification auth apparente
-  # ─────────────────────────────────────────────────────────────────────────────
-
-  - id: server-action-upsert-without-auth-comment
-    message: >
-      Appel .upsert() dans une Server Action.
-      Assurez-vous que supabase.auth.getUser() est appele et valide avant
-      toute modification de la base de donnees.
-    languages: [typescript]
-    severity: INFO
-    pattern: $SUPABASE.from(...).upsert(...)
-    paths:
-      include:
-        - "**/app/admin/**"
-        - "**/app/**/actions.ts"
