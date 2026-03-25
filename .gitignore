@@ -39,7 +39,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local tooling
+# local tooling — aucune trace des outils de développement sur le dépôt
 .claude/
+CLAUDE.md
 .vscode/
 .idea/
