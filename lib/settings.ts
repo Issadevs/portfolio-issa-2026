@@ -2,7 +2,9 @@
 // Les composants client doivent utiliser `import type { PortfolioSettings }`
 
 import { unstable_cache } from "next/cache";
-import { getSupabaseServerConfig, hasSupabaseServerConfig } from "@/lib/env/server";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { portfolioSettings } from "@/lib/db/schema";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,40 +45,27 @@ export const PORTFOLIO_SETTINGS_ID = DEFAULT_SETTINGS.id;
 
 export const getPortfolioSettings = unstable_cache(
   async (): Promise<PortfolioSettings> => {
-    if (!hasSupabaseServerConfig()) {
-      console.warn("[settings] SUPABASE env vars manquantes — fallback defaults");
+    if (!db) {
+      console.warn("[settings] DATABASE_URL manquant — fallback defaults");
       return DEFAULT_SETTINGS;
     }
 
-    const { url: supabaseUrl, key: anonKey } = getSupabaseServerConfig();
-
     try {
-      const res = await fetch(
-        `${supabaseUrl}/rest/v1/portfolio_settings?id=eq.${PORTFOLIO_SETTINGS_ID}&select=*`,
-        {
-          headers: {
-            apikey: anonKey,
-            Authorization: `Bearer ${anonKey}`,
-          },
-          cache: "no-store", // unstable_cache gère le cache
-        }
-      );
+      const rows = await db
+        .select()
+        .from(portfolioSettings)
+        .where(eq(portfolioSettings.id, PORTFOLIO_SETTINGS_ID))
+        .limit(1);
 
-      if (!res.ok) {
-        console.error(`[settings] Supabase REST ${res.status}`);
-        return DEFAULT_SETTINGS;
-      }
-
-      const rows = (await res.json()) as PortfolioSettings[];
       if (!rows.length) {
         console.warn("[settings] Aucune ligne en DB — fallback defaults");
         return DEFAULT_SETTINGS;
       }
 
-      return rows[0];
+      return rows[0] as PortfolioSettings;
     } catch (err) {
       console.error(
-        "[settings] Fetch error:",
+        "[settings] DB error:",
         err instanceof Error ? err.message : "unknown"
       );
       return DEFAULT_SETTINGS;

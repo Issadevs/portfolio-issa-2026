@@ -41,6 +41,7 @@ jobs:
       - name: Build
         env:
           NEXT_PUBLIC_SITE_URL: https://example.com
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres
         run: npm run build
 
       - name: Install Playwright browser

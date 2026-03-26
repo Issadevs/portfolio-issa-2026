@@ -1,8 +1,8 @@
 "use server";
 
 // app/admin/actions.ts — Server Actions pour l'admin
-// L'email est toujours vérifié côté serveur avant toute écriture
-// Stratégie DB : maybeSingle() → INSERT si vide, UPDATE si existe
+// Auth : Supabase (cookie-based session)
+// DB write : Drizzle ORM (DATABASE_URL)
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { createServerSupabase } from "@/lib/supabase/server";
@@ -14,6 +14,8 @@ import {
 import { hasSupabaseServerConfig } from "@/lib/env/server";
 import { IS_DEV } from "@/lib/env/shared";
 import { PROFILE } from "@/lib/profile";
+import { db } from "@/lib/db";
+import { portfolioSettings } from "@/lib/db/schema";
 
 const ALLOWED_EMAIL = PROFILE.adminEmail;
 
@@ -37,6 +39,7 @@ function checkRateLimit(userId: string): boolean {
 type ActionResult = { ok: true } | { error: string };
 
 export async function updateSettings(formData: FormData): Promise<ActionResult> {
+  // 1. Vérifications de configuration
   if (!hasSupabaseServerConfig()) {
     return {
       error: IS_DEV
@@ -45,9 +48,17 @@ export async function updateSettings(formData: FormData): Promise<ActionResult> 
     };
   }
 
+  if (!db) {
+    return {
+      error: IS_DEV
+        ? "DATABASE_URL n'est pas configuré."
+        : "Configuration serveur indisponible.",
+    };
+  }
+
   const supabase = await createServerSupabase();
 
-  // 1. Vérification auth
+  // 2. Vérification auth
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -55,12 +66,12 @@ export async function updateSettings(formData: FormData): Promise<ActionResult> 
   if (!user) return { error: "Non authentifié." };
   if (user.email !== ALLOWED_EMAIL) return { error: "Accès non autorisé." };
 
-  // 2. Rate limit
+  // 3. Rate limit
   if (!checkRateLimit(user.id)) {
     return { error: "Trop de modifications. Réessayez dans 1h." };
   }
 
-  // 3. Extraction + validation des champs
+  // 4. Extraction + validation des champs
   const status = (formData.get("status") as string)?.trim();
   const contract_type = (formData.get("contract_type") as string)?.trim();
   const available_from = (formData.get("available_from") as string)?.trim();
@@ -110,26 +121,24 @@ export async function updateSettings(formData: FormData): Promise<ActionResult> 
     updated_at: new Date().toISOString(),
   };
 
-  // 4. Upsert singleton : une seule ligne, id fixe = "default"
-  const { error: upsertError } = await supabase
-    .from("portfolio_settings")
-    .upsert(
-      {
-        id: DEFAULT_SETTINGS.id,
-        ...payload,
-      },
-      { onConflict: "id" }
+  // 5. Upsert singleton : une seule ligne, id fixe = "default"
+  try {
+    await db
+      .insert(portfolioSettings)
+      .values({ id: DEFAULT_SETTINGS.id, ...payload })
+      .onConflictDoUpdate({
+        target: portfolioSettings.id,
+        set: payload,
+      });
+  } catch (err) {
+    console.error(
+      "[admin/actions] DB error:",
+      err instanceof Error ? err.message : "unknown"
     );
-
-  if (upsertError) {
-    console.error("[admin/actions] Upsert error:", upsertError.message);
-    const hint = upsertError.message.includes("row-level security")
-      ? " → Vérifiez les policies RLS Supabase versionnées dans supabase/migrations."
-      : "";
-    return { error: `Échec de la sauvegarde : ${upsertError.message}${hint}` };
+    return { error: "Échec de la sauvegarde." };
   }
 
-  // 5. Invalidation du cache Next.js (homepage + data cache)
+  // 6. Invalidation du cache Next.js (homepage + data cache)
   revalidatePath("/");
   revalidatePath("/cv");
   revalidateTag("portfolio-settings", "max");
