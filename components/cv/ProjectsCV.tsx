@@ -9,16 +9,18 @@ interface ProjectsCVProps {
   t: (key: string) => string;
 }
 
-type ProjectKey = "petfinder" | "bookreco" | "cproject" | "sfr";
+type ProjectKey = "petfinder" | "bookreco" | "cproject" | "sfr" | "sad" | "metavideosync";
 
 const projectMeta: Record<
   ProjectKey,
   { emoji: string; accent: string; featured?: boolean; github?: string }
 > = {
-  petfinder: { emoji: "🐾", accent: "blue", github: "https://github.com/Issadevs/PetFinder" },
-  bookreco: { emoji: "📚", accent: "purple" },
-  cproject: { emoji: "⚙️", accent: "gray", github: "https://github.com/Issadevs/Projet-IA" },
-  sfr: { emoji: "🏢", accent: "red", featured: true },
+  sfr:           { emoji: "🏢", accent: "red",    featured: true },
+  sad:           { emoji: "🧠", accent: "violet", featured: true, github: "https://github.com/Issadevs/SAD-Tumeurs-Cerebrales" },
+  metavideosync: { emoji: "📱", accent: "blue" },
+  petfinder:     { emoji: "🐾", accent: "blue",   github: "https://github.com/Issadevs/PetFinder" },
+  bookreco:      { emoji: "📚", accent: "purple" },
+  cproject:      { emoji: "⚙️", accent: "gray",   github: "https://github.com/Issadevs/Projet-IA" },
 };
 
 
@@ -40,7 +42,7 @@ export default function ProjectsCV({ t }: ProjectsCVProps) {
           <p className="text-cv-muted text-base">{t("projects.subtitle")}</p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {projects.map(([key, meta], i) => (
             <motion.div
               key={key}

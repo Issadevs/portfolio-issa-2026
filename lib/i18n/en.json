@@ -103,6 +103,20 @@
       "impact": "Full pipeline Kafka → ES → ML → alerting, in production environment",
       "stack": ["Python/Flask", "Kafka", "Elasticsearch", "Prometheus", "ML"]
     },
+    "sad": {
+      "title": "SAD — Brain Tumors",
+      "category": "Medical AI & Machine Learning",
+      "description": "Decision Support System for brain tumor diagnosis from MRI scans. Predicts tumor type with a calibrated confidence score and generates patient reports.",
+      "impact": "CNN + Temperature Scaling calibration · 4 classes · 20 patient reports generated",
+      "stack": ["Python", "TensorFlow", "CNN", "Scikit-learn", "Jupyter"]
+    },
+    "metavideosync": {
+      "title": "MetaVideoSync",
+      "category": "Full-stack mobile application",
+      "description": "React Native app that scans the phone gallery and automatically identifies videos filmed with Ray-Ban Meta Smart Glasses using a 2-pass classification pipeline.",
+      "impact": "Native Swift + Kotlin modules · network-free Pass 1 · pnpm monorepo",
+      "stack": ["React Native", "TypeScript", "Expo", "Swift", "Kotlin", "Docker"]
+    },
     "evaluation_section": "Dataset & protocol",
     "evaluation_dataset_label": "Dataset",
     "evaluation_protocol_label": "Protocol"

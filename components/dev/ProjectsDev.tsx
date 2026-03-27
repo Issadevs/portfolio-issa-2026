@@ -9,7 +9,7 @@ interface ProjectsDevProps {
   lang: Lang;
 }
 
-type ProjectId = "sfr" | "bookreco" | "petfinder" | "cproject";
+type ProjectId = "sfr" | "bookreco" | "petfinder" | "cproject" | "sad" | "metavideosync";
 
 interface ProjectEvaluation {
   dataset: { fr: string; en: string };
@@ -227,6 +227,141 @@ class HybridRecommender:
   ORDER BY created_at DESC
   LIMIT #{limit} OFFSET #{offset}
 </select>`,
+    },
+  },
+  {
+    id: "sad",
+    starred: true,
+    icon: "🧠",
+    stack: ["Python", "TensorFlow/Keras", "CNN", "Scikit-learn", "Jupyter Notebook"],
+    github: "https://github.com/Issadevs/SAD-Tumeurs-Cerebrales",
+    architecture: {
+      fr: "IRM Dataset (Kaggle) → Preprocessing numpy/tf.data → CNN (extraction features) + MLP (classification) → Temperature Scaling (calibration confiance) → Decision Engine (seuils multiples) → Report Generator (rapport par patient)",
+      en: "MRI Dataset (Kaggle) → numpy/tf.data Preprocessing → CNN (feature extraction) + MLP (classification) → Temperature Scaling (confidence calibration) → Decision Engine (multi-threshold) → Report Generator (per-patient report)",
+    },
+    challenges: {
+      fr: [
+        "Overconfidence des CNNs sur données médicales → calibration par Temperature Scaling pour des probabilités fiables",
+        "Déséquilibre des classes (no_tumor dominant) → class weights adaptatifs + data augmentation ciblée",
+        "Seuils de décision clinique non arbitraires → calibrés sur courbe ROC avec AUC par classe",
+      ],
+      en: [
+        "CNN overconfidence on medical data → Temperature Scaling calibration for reliable probabilities",
+        "Class imbalance (no_tumor dominant) → adaptive class weights + targeted data augmentation",
+        "Non-arbitrary clinical decision thresholds → calibrated on ROC curve with per-class AUC",
+      ],
+    },
+    metrics: [
+      { label: { fr: "Classes tumorales", en: "Tumor classes" }, value: "4" },
+      { label: { fr: "Rapports patients", en: "Patient reports" }, value: "20" },
+      { label: { fr: "Calibration", en: "Calibration" }, value: "Temp. Scaling" },
+    ],
+    evaluation: {
+      dataset: {
+        fr: "Brain Tumor MRI Dataset — Kaggle (masoudnickparvar) · 4 classes : gliome, méningiome, no_tumor, hypophyse",
+        en: "Brain Tumor MRI Dataset — Kaggle (masoudnickparvar) · 4 classes: glioma, meningioma, no_tumor, pituitary",
+      },
+      protocol: {
+        fr: "Split train/test, CNN pré-entraîné fine-tuné, calibration post-hoc, seuils décision clinique à 0.85 / 0.60",
+        en: "Train/test split, fine-tuned pre-trained CNN, post-hoc calibration, clinical decision thresholds at 0.85 / 0.60",
+      },
+    },
+    snippet: {
+      lang: "python",
+      code: `# Moteur de décision à seuils multiples — SAD Tumeurs Cérébrales
+import numpy as np
+
+CLASSES = ["glioma", "meningioma", "no_tumor", "pituitary"]
+
+def make_decision(probs: np.ndarray, temperature: float = 1.5) -> dict:
+    # Temperature Scaling — réduit l'overconfidence du CNN
+    logits = np.log(probs + 1e-8)
+    calibrated = np.exp(logits / temperature)
+    calibrated /= calibrated.sum()
+
+    confidence = float(calibrated.max())
+    prediction = CLASSES[calibrated.argmax()]
+
+    if confidence >= 0.85:
+        recommendation = "Diagnostic confirmé — transmission immédiate"
+        requires_review = False
+    elif confidence >= 0.60:
+        recommendation = "Révision recommandée — second avis requis"
+        requires_review = True
+    else:
+        recommendation = "Cas ambigu — expertise spécialisée requise"
+        requires_review = True
+
+    return {
+        "prediction": prediction,
+        "confidence": round(confidence, 3),
+        "recommendation": recommendation,
+        "requires_review": requires_review,
+    }`,
+    },
+  },
+  {
+    id: "metavideosync",
+    starred: false,
+    icon: "📱",
+    stack: ["React Native", "Expo", "TypeScript", "Swift", "Kotlin", "Docker", "pnpm"],
+    architecture: {
+      fr: "App RN Expo (iOS + Android) → Pass 1 : scan métadonnées locales sans réseau (QuickTime tags, album, dossier) → Pass 2 : résolution iCloud ciblée via module natif Swift/Kotlin → Classification META / PENDING / NON_META → Backend API → MinIO storage",
+      en: "RN Expo App (iOS + Android) → Pass 1: local metadata scan with no network (QuickTime tags, album, folder) → Pass 2: targeted iCloud resolution via Swift/Kotlin native module → META / PENDING / NON_META classification → Backend API → MinIO storage",
+    },
+    challenges: {
+      fr: [
+        "Accès aux tags QuickTime non exposés par React Native → module natif custom en Swift (iOS) et Kotlin (Android)",
+        "Minimiser les requêtes réseau : Pass 1 locale et sans réseau, Pass 2 uniquement sur les candidats PENDING",
+        "Monorepo pnpm avec workspace types partagés entre mobile, backend et infra",
+      ],
+      en: [
+        "QuickTime tags not exposed by React Native → custom native module in Swift (iOS) and Kotlin (Android)",
+        "Minimize network requests: Pass 1 local and network-free, Pass 2 only on PENDING candidates",
+        "pnpm monorepo with shared TypeScript types between mobile, backend and infra",
+      ],
+    },
+    metrics: [
+      { label: { fr: "Plateformes", en: "Platforms" }, value: "iOS + Android" },
+      { label: { fr: "Passes classification", en: "Classification passes" }, value: "2" },
+      { label: { fr: "Architecture", en: "Architecture" }, value: "Monorepo" },
+    ],
+    evaluation: {
+      dataset: {
+        fr: "Galerie téléphone réelle — vidéos Ray-Ban Meta identifiées par tags QuickTime com.apple.quicktime.make",
+        en: "Real phone gallery — Ray-Ban Meta videos identified via QuickTime tag com.apple.quicktime.make",
+      },
+      protocol: {
+        fr: "Tests unitaires sur le classifier TS, tests d'intégration Maestro sur iOS/Android, validation Pass 1 sur corpus local",
+        en: "Unit tests on TS classifier, Maestro integration tests on iOS/Android, Pass 1 validation on local corpus",
+      },
+    },
+    snippet: {
+      lang: "typescript",
+      code: `// Pipeline de classification 2 passes — MetaVideoSync
+import { MetaMediaScanner } from "@/native/MetaMediaScanner";
+import type { MediaAsset, VideoLabel } from "@metavideosync/types";
+
+async function classifyAsset(asset: MediaAsset): Promise<VideoLabel> {
+  // Pass 1 — métadonnées locales, zéro réseau
+  const album = asset.albumName?.toLowerCase() ?? "";
+  const folder = asset.uri.split("/").slice(-2, -1)[0] ?? "";
+
+  if (album.includes("ray-ban") || folder.includes("meta")) {
+    return "META";
+  }
+
+  if (!asset.mayBeICloud) return "NON_META";
+
+  // Pass 2 — résolution iCloud ciblée (uniquement si PENDING)
+  const qtTags = await MetaMediaScanner.resolveQuickTimeTags(asset.uri);
+
+  const isMeta =
+    qtTags?.["com.apple.quicktime.make"] === "Meta" &&
+    qtTags?.["com.apple.quicktime.model"]?.includes("Ray-Ban");
+
+  return isMeta ? "META" : "NON_META";
+}`,
     },
   },
   {
