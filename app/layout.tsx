@@ -158,7 +158,7 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} // nosemgrep: dangerous-inner-html-dynamic
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} // nosemgrep
         />
         {children}
         {analyticsEnabled ? <Analytics /> : null}
