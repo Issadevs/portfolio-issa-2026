@@ -42,6 +42,10 @@ function formatDate(iso: string, lang: Lang): string {
 const TYPE_ICONS: Record<string, string> = {
   push: "↑",
   create: "+",
+  pr: "⇄",
+  issue: "!",
+  fork: "⑂",
+  release: "◈",
   star: "★",
   default: "·",
 };
