@@ -83,7 +83,7 @@ export default function OpenGraphImage() {
                   fontWeight: 600,
                 }}
               >
-                {PROFILE.role.fr}
+                {PROFILE.role.fr} · {PROFILE.role.en}
               </div>
             </div>
           </div>
@@ -106,11 +106,11 @@ export default function OpenGraphImage() {
               <div
                 style={{
                   display: "flex",
-                  fontSize: "28px",
+                  fontSize: "26px",
                   color: "#E2E8F0",
                 }}
               >
-                Je build des pipelines data et des systèmes ML.
+                Building data pipelines &amp; ML systems.
               </div>
               <div
                 style={{
