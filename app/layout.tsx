@@ -156,9 +156,9 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={`${inter.variable} antialiased`}>
-        <script // nosemgrep: dangerous-inner-html-dynamic
+        <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} // nosemgrep: dangerous-inner-html-dynamic
         />
         {children}
         {analyticsEnabled ? <Analytics /> : null}
