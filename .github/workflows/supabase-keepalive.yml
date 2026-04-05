@@ -23,17 +23,25 @@ jobs:
       - name: Ping REST API
         run: |
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --retry 3 \
+            --retry-delay 5 \
+            --retry-all-errors \
             "${{ secrets.SUPABASE_URL }}/rest/v1/" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}") || {
+            echo "✗ curl a échoué (DNS, réseau, ou SUPABASE_URL invalide)"
+            exit 1
+          }
 
           echo "Supabase response: $HTTP_STATUS"
 
           if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
             echo "✓ Supabase actif"
-          elif [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "404" ]; then
+          elif [ "$HTTP_STATUS" = "404" ]; then
             # 404 = endpoint vide mais Supabase est bien réveillé
-            echo "✓ Supabase actif (projet vide OK)"
+            echo "✓ Supabase actif (404 — projet vide OK)"
           else
             echo "✗ Réponse inattendue : $HTTP_STATUS"
             exit 1
